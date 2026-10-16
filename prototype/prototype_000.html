@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>涂解 · 低保真原型 prototype_000</title>
+<style>
+  :root{
+    --ink:#141414;
+    --line:#141414;
+    --mid:#6b6b6b;
+    --soft:#9a9a9a;
+    --panel:#f4f4f4;
+    --panel2:#ececec;
+    --chip:#e2e2e2;
+    --bg:#ffffff;
+    --hair:#c9c9c9;
+    --radius:6px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,"PingFang SC",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:13px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  code,kbd{font-family:Consolas,"Courier New",monospace;}
+
+  /* ---------- 布局 ---------- */
+  .layout{display:flex;align-items:flex-start;max-width:1440px;margin:0 auto;}
+  .side{
+    position:sticky;top:0;flex:0 0 236px;height:100vh;overflow:auto;
+    border-right:1px solid var(--hair);padding:18px 14px;background:var(--panel);
+  }
+  .main{flex:1 1 auto;min-width:0;padding:0 30px 80px;}
+
+  /* ---------- 文档头 ---------- */
+  .doc-head{border-bottom:2px solid var(--ink);padding:26px 0 16px;margin-bottom:8px;}
+  .doc-head h1{font-size:22px;margin:0 0 6px;letter-spacing:1px;}
+  .doc-head .sub{color:var(--mid);font-size:12px;}
+  .doc-head .tag{
+    display:inline-block;border:1px solid var(--ink);border-radius:20px;
+    padding:1px 10px;font-size:11px;margin-right:6px;background:var(--bg);
+  }
+
+  /* ---------- 图例 ---------- */
+  .legend{
+    border:1px solid var(--hair);border-radius:var(--radius);background:var(--panel);
+    padding:12px 16px;margin:18px 0 26px;
+  }
+  .legend h4{margin:0 0 8px;font-size:12px;letter-spacing:1px;}
+  .legend ul{margin:0;padding-left:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 26px;}
+  .legend li{font-size:12px;color:var(--mid);}
+  .legend b{color:var(--ink);}
+  .sw{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px;border:1px solid var(--ink);}
+  .sw.solid{background:var(--bg);}
+  .sw.dash{border-style:dashed;}
+  .sw.hatch{background:repeating-linear-gradient(45deg,#d0d0d0 0 3px,#fafafa 3px 6px);}
+  .sw.gray{background:var(--chip);}
+  .sw.thick{border-width:3px;}
+
+  /* ---------- 侧栏目录 ---------- */
+  .side h3{font-size:12px;letter-spacing:1px;margin:16px 0 8px;color:var(--ink);}
+  .side h3:first-child{margin-top:0;}
+  .side a{display:block;text-decoration:none;font-size:12px;color:var(--mid);padding:3px 6px;border-radius:4px;}
+  .side a:hover{background:var(--chip);color:var(--ink);}
+  .side a .n{display:inline-block;width:30px;color:var(--soft);}
+
+  /* ---------- 分组 ---------- */
+  .group{margin-top:38px;}
+  .group-title{
+    display:flex;align-items:baseline;gap:10px;
+    border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:4px;
+  }
+  .group-title .idx{font-size:20px;font-weight:700;}
+  .group-title h2{font-size:17px;margin:0;letter-spacing:1px;}
+  .group-note{font-size:12px;color:var(--mid);margin:10px 0 0;}
+
+  /* ---------- 屏卡片 ---------- */
+  .screen{border:1px solid var(--hair);border-radius:var(--radius);margin-top:20px;background:var(--bg);overflow:hidden;}
+  .screen-head{display:flex;align-items:center;gap:12px;background:var(--panel2);border-bottom:1px solid var(--hair);padding:9px 14px;flex-wrap:wrap;}
+  .screen-head .num{
+    font-weight:700;font-size:12px;border:1px solid var(--ink);border-radius:4px;
+    padding:1px 8px;background:var(--bg);
+  }
+  .screen-head h3{font-size:14px;margin:0;flex:1 1 auto;min-width:120px;}
+  .pos{font-size:11px;color:var(--mid);border:1px solid var(--hair);border-radius:20px;padding:1px 9px;background:var(--bg);}
+  .screen-body{display:grid;grid-template-columns:minmax(0,1fr) 300px;}
+  @media(max-width:1000px){.screen-body{grid-template-columns:minmax(0,1fr);}}
+
+  /* ---------- 线框图 ---------- */
+  .wire{padding:16px;border-right:1px dashed var(--hair);min-width:0;overflow:auto;}
+  .wframe{border:1px solid var(--ink);border-radius:4px;background:var(--bg);min-width:520px;}
+  .wframe.narrow{min-width:360px;}
+  .wbar{
+    border-bottom:1px solid var(--ink);background:var(--panel);
+    display:flex;align-items:center;gap:8px;padding:5px 8px;font-size:11px;flex-wrap:wrap;
+  }
+  .wbar .t{font-weight:700;}
+  .wbody{padding:10px;}
+  .row{display:flex;gap:8px;align-items:stretch;}
+  .col{display:flex;flex-direction:column;gap:8px;}
+  .grow{flex:1 1 auto;min-width:0;}
+
+  .box{border:1px solid var(--ink);border-radius:3px;background:var(--bg);}
+  .box.dash{border-style:dashed;}
+  .box.gray{background:var(--panel);}
+  .box.pad{padding:6px 8px;}
+  .lbl{font-size:10px;color:var(--mid);letter-spacing:.5px;text-transform:none;}
+  .txt{font-size:11px;}
+  .muted{color:var(--soft);}
+  .mono{font-family:Consolas,monospace;}
+
+  .btn{
+    display:inline-block;border:1px solid var(--ink);border-radius:3px;
+    padding:2px 9px;font-size:11px;background:var(--bg);white-space:nowrap;
+  }
+  .btn.solid{background:var(--ink);color:var(--bg);}
+  .btn.dis{background:var(--panel2);color:var(--soft);border-color:var(--soft);}
+  .btn.sm{padding:1px 7px;font-size:10px;}
+  .chip{
+    display:inline-block;border:1px solid var(--hair);border-radius:3px;
+    padding:1px 7px;font-size:10px;background:var(--panel);color:var(--mid);
+  }
+  .chip.on{border-color:var(--ink);background:var(--chip);color:var(--ink);}
+
+  /* 画布 / 图片占位 */
+  .ph{
+    background:repeating-linear-gradient(45deg,#dedede 0 5px,#fbfbfb 5px 10px);
+    border:1px solid var(--ink);border-radius:3px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;color:var(--mid);text-align:center;padding:6px;
+  }
+  .ph.tall{min-height:230px;}
+
+  /* 迷你网格（画布示意） */
+  .mini{display:grid;background:var(--bg);border:1px solid var(--ink);width:fit-content;}
+  .mini i{border:1px solid var(--hair);width:22px;height:22px;display:block;position:relative;}
+  .mini i.tile{background:var(--chip);}
+  .mini i.fill{background:#cfcfcf;}
+  .mini i.half{background:#e4e4e4;}
+  .mini i.seed{background:var(--bg);}
+  .mini i.seed::after{content:attr(data-e);position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+  /* 状态标记 */
+  .warn{font-size:11px;font-weight:700;}
+  .warn::before{content:"⚠ ";}
+  .redbox{border:3px solid var(--ink)!important;}
+
+  /* ---------- 注释区 ---------- */
+  .notes{padding:14px 16px;background:var(--panel);min-width:0;}
+  .notes .sec{margin-bottom:12px;}
+  .notes .sec:last-child{margin-bottom:0;}
+  .notes .sec h5{
+    margin:0 0 6px;font-size:11px;letter-spacing:1px;color:var(--ink);
+    border-bottom:1px solid var(--hair);padding-bottom:3px;
+  }
+  .notes ul{margin:0;padding-left:16px;}
+  .notes li{font-size:11.5px;margin-bottom:3px;color:var(--mid);}
+  .notes li b{color:var(--ink);}
+  .nav-list{margin:0;padding-left:0;list-style:none;}
+  .nav-list li{font-size:11.5px;margin-bottom:4px;color:var(--ink);}
+  .nav-list li .a{color:var(--mid);}
+  .nav-list li .arrow{color:var(--soft);margin:0 4px;}
+  .nav-list li .to{border-bottom:1px dotted var(--ink);}
+  .prd{font-size:10.5px;color:var(--soft);font-style:italic;}
+
+  .tbd{
+    border:1px dashed var(--ink);border-radius:3px;background:
+    repeating-linear-gradient(45deg,#f0f0f0 0 5px,#ffffff 5px 10px);
+    padding:5px 8px;font-size:11px;margin-top:4px;
+  }
+  .tbd b{display:inline-block;border:1px solid var(--ink);border-radius:3px;padding:0 5px;font-size:10px;margin-right:5px;background:var(--bg);}
+  .ok{
+    border:1px solid var(--ink);border-radius:3px;background:#efefef;
+    padding:5px 8px;font-size:11px;margin-top:4px;
+  }
+  .ok b{display:inline-block;border:1px solid var(--ink);border-radius:3px;padding:0 5px;font-size:10px;margin-right:5px;background:var(--bg);}
+
+  .sub-title{
+    font-size:13px;font-weight:700;letter-spacing:.5px;margin-top:20px;
+    padding-bottom:4px;border-bottom:1px solid var(--hair);
+  }
+
+  /* 列表表格 */
+  table.list{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px;}
+  table.list th,table.list td{border:1px solid var(--hair);padding:6px 8px;text-align:left;vertical-align:top;}
+  table.list th{background:var(--panel2);font-size:11px;letter-spacing:.5px;}
+  table.list td.id{white-space:nowrap;font-weight:700;width:56px;}
+
+  .foot{border-top:1px solid var(--hair);margin-top:36px;padding-top:12px;color:var(--soft);font-size:11px;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ==================== 侧栏目录 ==================== -->
+<nav class="side">
+  <h3>流程导航</h3>
+  <a href="#gA"><span class="n">A</span>启动与主页</a>
+  <a href="#gB"><span class="n">B</span>设计模式</a>
+  <a href="#gC"><span class="n">C</span>草稿箱 · 保存与发布</a>
+  <a href="#gE"><span class="n">E</span>题库与游玩</a>
+  <a href="#gF"><span class="n">F</span>异常与边界状态</a>
+  <a href="#tbd"><span class="n">!</span>决策记录与遗留项</a>
+  <h3>页面 / 状态</h3>
+  <a href="#a1"><span class="n">A1</span>主页（启动即进入）</a>
+  <a href="#a2"><span class="n">A2</span>存储位置设置</a>
+  <a href="#b1"><span class="n">B1</span>设计模式·空白</a>
+  <a href="#b2"><span class="n">B2</span>规则层·数字型</a>
+  <a href="#b3"><span class="n">B3</span>规则层·形状型</a>
+  <a href="#b4"><span class="n">B4</span>规则层·收集型</a>
+  <a href="#b5"><span class="n">B5</span>规则层·多规则组合</a>
+  <a href="#b6"><span class="n">B6</span>图层面板·洋葱皮</a>
+  <a href="#b7"><span class="n">B7</span>颜色池</a>
+  <a href="#b8"><span class="n">B8</span>画布·0/1层</a>
+  <a href="#b9"><span class="n">B9</span>画布·2层分割线</a>
+  <a href="#b10"><span class="n">B10</span>画布·3层推演</a>
+  <a href="#b11"><span class="n">B11</span>画布·3.5层贴纸</a>
+  <a href="#b12"><span class="n">B12</span>实时反馈汇总</a>
+  <a href="#c1"><span class="n">C1</span>草稿箱列表</a>
+  <a href="#c2"><span class="n">C2</span>草稿重命名</a>
+  <a href="#c3"><span class="n">C3</span>删除版本确认</a>
+  <a href="#c4"><span class="n">C4</span>发布确认</a>
+  <a href="#c5"><span class="n">C5</span>发布门槛失败</a>
+  <a href="#c6"><span class="n">C6</span>发布成功</a>
+  <a href="#e1"><span class="n">E1</span>题库列表</a>
+  <a href="#e2"><span class="n">E2</span>题库空态</a>
+  <a href="#e3"><span class="n">E3</span>导入 JSON</a>
+  <a href="#e4"><span class="n">E4</span>导出</a>
+  <a href="#e5"><span class="n">E5</span>游玩视图</a>
+  <a href="#e6"><span class="n">E6</span>通关成功</a>
+  <a href="#e7"><span class="n">E7</span>答案不对</a>
+  <a href="#f1"><span class="n">F1</span>文件损坏（按情况提示）</a>
+  <a href="#f2"><span class="n">F2</span>扫描发现损坏文件</a>
+</nav>
+
+<!-- ==================== 正文 ==================== -->
+<main class="main">
+
+  <header class="doc-head">
+    <h1>涂解 · 低保真原型 <span class="mono">prototype_000</span></h1>
+    <div class="sub">
+      <span class="tag">低保真</span>
+      <span class="tag">全流程平铺</span>
+      <span class="tag">单文件</span>
+      依据：《涂解 PRD》MVP v0.8（2026-10-08）
+    </div>
+    <p class="group-note" style="margin-top:12px;">
+      本文件只表达 <b>信息层级 / 核心文案 / 按钮位置 / 页面状态</b>，不含正式 UI 与配色。
+      所有页面按“用户真实使用顺序”分组平铺（A 启动与主页 / B 设计模式 / C 草稿与发布 / E 题库与游玩 / F 异常边界；<b>D 测试区已取消</b>）；每屏标注
+      <b>页面名称 · 流程位置 · 可执行操作 · 操作后去向</b>。
+      已按你的答复确定的决策标为「<b>已确认</b>」，仍不清楚的标为「<b>待确认</b>」，不自行补全。
+    </p>
+  </header>
+
+  <section class="legend">
+    <h4>图例说明</h4>
+    <ul>
+      <li><span class="sw solid"></span><b>实线框</b>：界面元素 / 容器 / 按钮</li>
+      <li><span class="sw dash"></span><b>虚线框</b>：状态变体、空态、占位</li>
+      <li><span class="sw hatch"></span><b>斜纹块</b>：画布 / 图片占位（此处代表网格画布）</li>
+      <li><span class="sw gray"></span><b>灰块</b>：已填充内容（地砖 / 区块 / 已选色）</li>
+      <li><span class="sw thick"></span><b>粗黑框</b>：违规 / 失败 / 禁用状态（低保真以粗框替代标红）</li>
+      <li>[ 按钮 ] 方括号内为可点击按钮；<b>禁用</b>按钮以灰色描边表示</li>
+      <li><b>「已确认」</b>灰底实框＝已按你的答复确定的决策；<b>「待确认」</b>斜纹虚框＝仍需你确认</li>
+    </ul>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- A 启动与主页 -->
+  <!-- ============================================================ -->
+  <section class="group" id="gA">
+    <div class="group-title"><span class="idx">A</span><h2>启动与主页</h2></div>
+    <p class="group-note">启动即进入主页（草稿箱 / 题库 / 存储位置 三入口）；首次使用与普通启动不做区分，无独立启动画面 / 加载表现。</p>
+
+    <!-- A1 主页 -->
+    <article class="screen" id="a1">
+      <div class="screen-head">
+        <span class="num">A1</span>
+        <h3>主页（启动即进入 · 全局入口）</h3>
+        <span class="pos">流程位置：第 1 步 · 启动入口</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe">
+            <div class="wbar"><span class="t">涂解</span><span class="muted">主页 / 入口</span></div>
+            <div class="wbody">
+              <div class="row" style="gap:12px;">
+                <div class="box pad grow" style="text-align:center;padding:14px;">
+                  <div class="ph" style="height:34px;margin-bottom:8px;">图标占位</div>
+                  <div class="txt"><b>草稿箱</b></div>
+                  <div class="lbl">管理未完成的关卡草稿</div>
+                  <div style="margin-top:8px;">[ 打开 ]</div>
+                </div>
+                <div class="box pad grow" style="text-align:center;padding:14px;">
+                  <div class="ph" style="height:34px;margin-bottom:8px;">图标占位</div>
+                  <div class="txt"><b>题库</b></div>
+                  <div class="lbl">游玩已发布的关卡</div>
+                  <div style="margin-top:8px;">[ 打开 ]</div>
+                </div>
+                <div class="box pad grow" style="text-align:center;padding:14px;">
+                  <div class="ph" style="height:34px;margin-bottom:8px;">图标占位</div>
+                  <div class="txt"><b>存储位置</b></div>
+                  <div class="lbl">设置关卡数据存储路径</div>
+                  <div style="margin-top:8px;">[ 打开 ]</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>启动后直接就是本主页（草稿箱 / 题库 / 存储位置 三个入口）；首次使用与普通启动不做区分，无独立启动画面。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 草稿箱 ]</span><span class="arrow">→</span><span class="to">C1 草稿箱列表</span></li>
+              <li><span class="a">[ 题库 ]</span><span class="arrow">→</span><span class="to">E1 题库列表（关卡列表）</span></li>
+              <li><span class="a">[ 存储位置 ]</span><span class="arrow">→</span><span class="to">A2 存储位置设置</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>首次使用：草稿箱为空、题库为空（见 E2 / C1 空态）</li>
+              <li>无启动 loading / 加载表现（已确认）</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">三、产品结构；10.1 草稿箱；10.6 存储路径设置</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- A2 存储位置设置 -->
+    <article class="screen" id="a2">
+      <div class="screen-head">
+        <span class="num">A2</span>
+        <h3>存储位置设置（弹窗）</h3>
+        <span class="pos">流程位置：任意时刻 · 全局设置</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow">
+            <div class="wbar"><span class="t">存储位置</span></div>
+            <div class="wbody">
+              <div class="box pad" style="margin-bottom:8px;">
+                <div class="lbl">当前存储位置：</div>
+                <div class="txt mono muted">D:\...\data\</div>
+              </div>
+              <div class="lbl" style="margin-bottom:10px;">默认路径：应用目录下的 <code>data/</code></div>
+              <div class="row" style="gap:6px;">
+                <span class="btn">选择文件夹</span>
+                <span class="btn">恢复默认</span>
+                <span class="btn">关闭</span>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>修改存储路径后<b>自动迁移</b>已有草稿 / 题库 / 通关记录，<b>不覆盖</b>新位置已存在的文件。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 选择文件夹 ]（系统对话框）</span><span class="arrow">→</span><span class="to">迁移后再进入各页面</span></li>
+              <li><span class="a">[ 恢复默认 ]</span><span class="arrow">→</span><span class="to">回到默认 data/ 路径</span></li>
+              <li><span class="a">[ 关闭 ]</span><span class="arrow">→</span><span class="to">返回调用页面</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>切换中：自动迁移，无加载表现（已确认）</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">10.6 存储路径设置；8.4 AppSettings.storage_path</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- B 设计模式 -->
+  <!-- ============================================================ -->
+  <section class="group" id="gB">
+    <div class="group-title"><span class="idx">B</span><h2>设计模式</h2></div>
+    <p class="group-note">左侧面板（规则层 + 图层面板 + 颜色池）+ 右侧图层化画布。核心动作：定义规则 → 分层绘制 → 实时反馈。</p>
+
+    <!-- B1 -->
+    <article class="screen" id="b1">
+      <div class="screen-head">
+        <span class="num">B1</span>
+        <h3>设计模式 · 初始空白（刚新建草稿）</h3>
+        <span class="pos">流程位置：设计流程起点</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe">
+            <div class="wbar">
+              <span class="t">工具栏</span>
+              <span class="btn">返回草稿箱</span>
+              <span class="btn">新建</span>
+              <span class="muted">|</span>
+              <span class="box dash pad" style="padding:1px 10px;min-width:90px;">关卡名（未命名关卡）</span>
+              <span class="btn">保存</span>
+              <span class="btn">另存为</span>
+              <span class="btn dis">发布</span>
+              <span class="lbl">难度 [ 1 ▾ ]</span>
+              <span class="lbl">网格大小 [ 8 × 8 ▾ ]</span>
+            </div>
+            <div class="wbody">
+              <div class="row" style="gap:10px;align-items:stretch;">
+                <div class="col" style="flex:0 0 200px;">
+                  <div class="box pad">
+                    <div class="lbl"><b>规则层</b></div>
+                    <div class="lbl" style="margin:4px 0;">模式数量：[1][2][3]</div>
+                    <div class="box dash pad" style="margin-top:4px;">
+                      <div class="txt"><b>规则 1</b> 类型 [ 数字型 ▾ ]</div>
+                      <div class="lbl muted">（参数区随类型动态切换）</div>
+                    </div>
+                    <div class="lbl warn" style="margin-top:6px;">规则设置未完成：…</div>
+                  </div>
+                  <div class="box pad">
+                    <div class="lbl"><b>图层面板</b></div>
+                    <div class="txt">👁 3.5层 贴纸</div>
+                    <div class="txt">👁 3层 推演</div>
+                    <div class="txt">👁 2层 分割线</div>
+                    <div class="txt">👁 1层 限制区域</div>
+                    <div class="txt">👁 0层 网格 ●</div>
+                  </div>
+                  <div class="box pad">
+                    <div class="lbl"><b>颜色池</b></div>
+                    <div class="txt">■ ■ ■ ■ ■ ■ ■ ■</div>
+                    <div class="lbl">已选 8 / 8 色 · 提示：至少选 2 色</div>
+                  </div>
+                </div>
+                <div class="col grow">
+                  <div class="ph tall" style="min-height:240px;">空白网格画布占位<br><span class="muted">默认 8×8，可调 5×5 – 15×15</span></div>
+                  <div class="lbl muted">画布单画布 + 图层面板；当前层 100%，其他可见层 30%（洋葱皮）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">填关卡名</span><span class="arrow">→</span><span class="to">停留本页（未命名关卡为默认值）</span></li>
+              <li><span class="a">配置规则</span><span class="arrow">→</span><span class="to">B2 / B3 / B4 / B5</span></li>
+              <li><span class="a">[ 保存 ]</span><span class="arrow">→</span><span class="to">写草稿（draft）→ C1</span></li>
+              <li><span class="a">[ 另存为 ]</span><span class="arrow">→</span><span class="to">新建版本文件 → C1</span></li>
+              <li><span class="a">[ 发布 ]（初始禁用，需先保存）</span><span class="arrow">→</span><span class="to">C4 发布确认</span></li>
+              <li><span class="a">切换图层 / 编辑各层</span><span class="arrow">→</span><span class="to">B6 图层 → B8–B11 各层画布</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li><b>空白</b>：刚打开，什么都没画</li>
+              <li><b>编辑中</b>：正在画</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.1 左侧面板；4.5 图层化画布；9.1 编辑器状态；9.3 关卡名编辑规则；10.3 难度标注</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B2 -->
+    <article class="screen" id="b2">
+      <div class="screen-head">
+        <span class="num">B2</span>
+        <h3>规则层 · 数字型参数区（3 种状态）</h3>
+        <span class="pos">流程位置：B1 规则配置 · 分支 1</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:210px;">
+              <div class="wbar"><span class="t">数字型</span><span class="muted">未填满</span></div>
+              <div class="wbody">
+                <div class="lbl">数量 n: [−] [ 3 ] [+]</div>
+                <div class="lbl">数字列表：</div>
+                <div class="txt mono">[ 2 ]</div>
+                <div class="txt mono">[ 3 ]</div>
+                <div class="txt mono dashed" style="border:1px dashed var(--mid);padding:1px 6px;">[ 空 ]</div>
+                <div class="lbl">已填 2 / 3</div>
+                <div class="lbl warn">未填满时发布被硬拦截（不可发布）</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:210px;">
+              <div class="wbar"><span class="t">数字型</span><span class="muted">已填满 ✓</span></div>
+              <div class="wbody">
+                <div class="lbl">数量 n: [ 3 ]</div>
+                <div class="txt mono">[ 2 ]  [ 3 ]  [ 4 ]</div>
+                <div class="lbl">已填 3 / 3</div>
+                <div class="txt">✓ 数字已填满</div>
+                <div class="lbl">满足后可继续配置其他规则 / 去画布绘制（无分步“下一步”按钮）</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:210px;">
+              <div class="wbar"><span class="t">数字型</span><span class="muted">校验失败</span></div>
+              <div class="wbody">
+                <div class="lbl">数量 n: [ 3 ]</div>
+                <div class="txt mono redbox" style="border:2px solid var(--ink);padding:1px 6px;display:inline-block;">[ 3 ]</div>
+                <div class="txt mono redbox" style="border:2px solid var(--ink);padding:1px 6px;display:inline-block;">[ 3 ]</div>
+                <div class="txt mono">[ 4 ]</div>
+                <div class="lbl warn">数字不能重复</div>
+                <div class="lbl warn">数字总和不能超过网格格子数</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">设 n / 填 n 个数字</span><span class="arrow">→</span><span class="to">停留本页（实时校验）</span></li>
+              <li><span class="a">填满且合法</span><span class="arrow">→</span><span class="to">B12 实时检测开启</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>未填满（下一步置灰） / 已填满 ✓</li>
+              <li>去重失败：重复数字<b>全部标红</b></li>
+              <li>范围：1 ≤ 数字 ≤ gridSize²；总和 ≤ gridSize²</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.2.1 数字型；4.2.4 完成 n 个才能下一步</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B3 -->
+    <article class="screen" id="b3">
+      <div class="screen-head">
+        <span class="num">B3</span>
+        <h3>规则层 · 形状型参数区（绘制 / 校验 / 展示）</h3>
+        <span class="pos">流程位置：B1 规则配置 · 分支 2</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">形状型</span><span class="muted">网格绘制中 · 联通 ✓</span></div>
+              <div class="wbody">
+                <div class="lbl">数量 n: [ 3 ] · 已保存 1 / 3</div>
+                <div class="mini" style="grid-template-columns:repeat(5,1fr);margin:6px 0;">
+                  <i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                  <i class="tile"></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="txt">✓ 形状联通</div>
+                <div><span class="btn">保存形状</span></div>
+                <div class="lbl">已保存：缩略图 #1（右键可删）</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">形状型</span><span class="muted">不联通 ✗</span></div>
+              <div class="wbody">
+                <div class="mini redbox" style="grid-template-columns:repeat(5,1fr);border:3px solid var(--ink);margin:6px 0;">
+                  <i class="tile"></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i class="tile"></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="lbl warn">✗ 形状不联通，请重选</div>
+                <div><span class="btn dis">保存形状</span></div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">形状型</span><span class="muted">重复 ✗</span></div>
+              <div class="wbody">
+                <div class="mini redbox" style="border:3px solid var(--ink);margin:6px 0;grid-template-columns:repeat(5,1fr);">
+                  <i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                  <i class="tile"></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="lbl warn">该形状已存在（与形状 1 相同）</div>
+                <div><span class="btn dis">保存形状</span></div>
+                <div class="lbl">已保存的重复形状加粗框高亮</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">形状型</span><span class="muted">已满 n → 形状展示区</span></div>
+              <div class="wbody">
+                <div class="lbl">已保存 3 / 3 · ✓ 形状已填满</div>
+                <div class="row" style="gap:6px;">
+                  <div class="box pad" style="text-align:center;"><div class="lbl">#1</div><div class="ph" style="width:44px;height:44px;">▢</div></div>
+                  <div class="box pad" style="text-align:center;"><div class="lbl">#2</div><div class="ph" style="width:44px;height:44px;">▢</div></div>
+                  <div class="box pad" style="text-align:center;"><div class="lbl">#3</div><div class="ph" style="width:44px;height:44px;">▢</div></div>
+                </div>
+                <div class="lbl" style="margin-top:4px;">右键删除 → 回到网格模式</div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>形状型选择画布固定 5×5，<b>不可调整</b>；可调大小的是设计画布网格（5×5 – 15×15）。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">左键勾选 / 右键取消勾选</span><span class="arrow">→</span><span class="to">实时 BFS 联通检测</span></li>
+              <li><span class="a">[ 保存形状 ]</span><span class="arrow">→</span><span class="to">存入列表，网格清空，已保存 +1</span></li>
+              <li><span class="a">右键缩略图</span><span class="arrow">→</span><span class="to">删除形状 → 回到网格模式</span></li>
+              <li><span class="a">n 减少（已保存数 &gt; 新 n）</span><span class="arrow">→</span><span class="to">禁止并提示“请先删除多余形状”</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>联通 ✓ / 不联通 ✗（保存置灰）</li>
+              <li>重复：网格标红 + 已保存重复项加框高亮</li>
+              <li>已满 n：参数区切换为形状展示区</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.2.2 形状型；2.1 形状相同判定；2.2 形状联通判定</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B4 -->
+    <article class="screen" id="b4">
+      <div class="screen-head">
+        <span class="num">B4</span>
+        <h3>规则层 · 收集型参数区（种子卡片三种状态）</h3>
+        <span class="pos">流程位置：B1 规则配置 · 分支 3</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:340px;">
+            <div class="wbar"><span class="t">收集型</span><span class="muted">种子列表（固定 5 种）</span></div>
+            <div class="wbody">
+              <div class="lbl">数量 n: [−] [ 3 ] [+] · 已选 2 / 3</div>
+              <div class="row" style="gap:8px;margin-top:8px;">
+                <div class="box pad" style="text-align:center;border:2px solid var(--ink);">
+                  <div style="font-size:18px;">🌸</div><div class="lbl">花 · 已选</div>
+                </div>
+                <div class="box pad" style="text-align:center;">
+                  <div style="font-size:18px;">🌿</div><div class="lbl">草 · 未选(可点)</div>
+                </div>
+                <div class="box pad" style="text-align:center;opacity:.4;">
+                  <div style="font-size:18px;">🌰</div><div class="lbl">果 · 已满n禁用</div>
+                </div>
+                <div class="box pad" style="text-align:center;opacity:.4;">
+                  <div style="font-size:18px;">🍃</div><div class="lbl">叶 · 已满n禁用</div>
+                </div>
+                <div class="box pad" style="text-align:center;opacity:.4;">
+                  <div style="font-size:18px;">🌱</div><div class="lbl">芽 · 已满n禁用</div>
+                </div>
+              </div>
+              <div class="lbl" style="margin-top:6px;">已选种子数 = n 时显示 "✓ 种子已选满"</div>
+              <div class="lbl warn">n 减少且已选 &gt; 新 n → 禁止减少，提示“请先取消多余种子”</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>先“选满 n 种种子”，解锁 3.5 层工具栏出现种子按钮，再放置贴纸；先后关系明确。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">设 n / 勾选种子</span><span class="arrow">→</span><span class="to">停留本页（实时计数）</span></li>
+              <li><span class="a">选满 n 种</span><span class="arrow">→</span><span class="to">解锁 3.5 层工具栏，出现种子按钮（描述，非按钮跳转）</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>已选中（高亮边框，可点取消）</li>
+              <li>未选中 + 未满 n（可点）</li>
+              <li>未选中 + 已满 n（透明度 0.4，不可点，禁止光标）</li>
+              <li>seedTypes 变化时自动清理不在新种子列表中的已有贴纸</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.2.3 收集型；2.6 收集型约束；8.1.1 seed_types</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B5 -->
+    <article class="screen" id="b5">
+      <div class="screen-head">
+        <span class="num">B5</span>
+        <h3>规则层 · 多规则组合（数量 / 类型过滤 / 减少确认）</h3>
+        <span class="pos">流程位置：B1 规则配置 · 组合态</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:270px;">
+              <div class="wbar"><span class="t">规则层</span><span class="muted">2 条规则（类型不重复）</span></div>
+              <div class="wbody">
+                <div class="lbl">模式数量：[1][<b>2</b>][3]</div>
+                <div class="box dash pad" style="margin-top:6px;">
+                  <div class="txt"><b>规则 1</b> 类型 [ 数字型 ▾ ]</div>
+                  <div class="lbl">（类型下拉过滤掉已被占用的类型）</div>
+                </div>
+                <div class="box dash pad" style="margin-top:6px;">
+                  <div class="txt"><b>规则 2</b> 类型 [ 收集型 ▾ ]</div>
+                </div>
+                <div class="lbl" style="margin-top:6px;">所有规则完备才显示 “✓ 规则设置完成”，否则显示“规则 X 未完成：原因”</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">减少模式数量</span><span class="muted">确认弹窗</span></div>
+              <div class="wbody">
+                <div class="box dash pad">
+                  <div class="txt">将删除规则 2 的配置，确认？</div>
+                  <div class="row" style="gap:6px;margin-top:8px;">
+                    <span class="btn">确认</span><span class="btn">取消</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">增加模式数量</span><span class="arrow">→</span><span class="to">末尾追加默认卡片（取未占用类型）</span></li>
+              <li><span class="a">减少模式数量</span><span class="arrow">→</span><span class="to">若卡片有配置 → 确认弹窗</span></li>
+              <li><span class="a">切换卡片类型</span><span class="arrow">→</span><span class="to">参数区动态切换</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>规则类型池：[数字型, 形状型, 收集型]，每类型最多 1 次</li>
+              <li>规则完备状态栏：完成 / 未完成（含具体原因）</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.2 规则层；2.6 多规则组合；8.1.1 RuleConfig</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B6 -->
+    <article class="screen" id="b6">
+      <div class="screen-head">
+        <span class="num">B6</span>
+        <h3>图层面板 · 洋葱皮（切换编辑层）</h3>
+        <span class="pos">流程位置：设计模式任意时刻</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:200px;">
+              <div class="wbar"><span class="t">图层面板</span></div>
+              <div class="wbody">
+                <div class="txt">👁 3.5层 贴纸 &nbsp;[ ]</div>
+                <div class="txt">👁 3层 推演 &nbsp;&nbsp;&nbsp;[ ]</div>
+                <div class="txt"><b>👁 2层 分割线</b> &nbsp;[●] ← 当前编辑层</div>
+                <div class="txt">👁 1层 限制区域 [ ]</div>
+                <div class="txt">👁 0层 网格 &nbsp;&nbsp;&nbsp;[ ]</div>
+                <div class="lbl" style="margin-top:6px;">图层顺序固定，不可拖拽</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">画布</span><span class="muted">洋葱皮示意</span></div>
+              <div class="wbody">
+                <div class="ph" style="height:120px;">
+                  当前层 100% 不透明<br>
+                  <span class="muted">其他可见层 30% 透明</span><br>
+                  <span class="muted">隐藏层不显示</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">点图层名</span><span class="arrow">→</span><span class="to">切到该层编辑（画布操作随之变化）</span></li>
+              <li><span class="a">点眼睛图标</span><span class="arrow">→</span><span class="to">显示 / 隐藏该层</span></li>
+              <li><span class="a">切到 1/2/3/3.5 层</span><span class="arrow">→</span><span class="to">B8 / B9 / B10 / B11</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>当前编辑层高亮 [●]</li>
+              <li>洋葱皮：非编辑层统一 30%（MVP 简化，单层调透明度留作后续）</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.3 图层面板；13 附录 21/22 条</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B7 -->
+    <article class="screen" id="b7">
+      <div class="screen-head">
+        <span class="num">B7</span>
+        <h3>颜色池（设计模式 / 测试区左侧面板）</h3>
+        <span class="pos">流程位置：设计模式任意时刻</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">颜色池</span><span class="muted">正常</span></div>
+              <div class="wbody">
+                <div class="txt">■ ■ ■ ■ ■ ■ ■ ■</div>
+                <div class="lbl">已选 8 / 8 色</div>
+                <div class="lbl">提示：至少选 2 色</div>
+                <div class="lbl">勾选：本色填充 + 深色边框，opacity 1</div>
+                <div class="lbl">取消：本色填充 + 无边框，opacity 0.35</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">颜色池</span><span class="muted">仅剩 1 色（禁止）</span></div>
+              <div class="wbody">
+                <div class="txt">■ <span class="muted">□ □ □ □ □ □ □</span></div>
+                <div class="lbl">已选 1 / 8 色</div>
+                <div class="lbl warn">至少保留 2 种颜色（禁止取消勾选）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">点色块</span><span class="arrow">→</span><span class="to">切换勾选（仅影响新下笔 / 换色）</span></li>
+              <li><span class="a">取消到只剩 1 色</span><span class="arrow">→</span><span class="to">被禁止 + 提示</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>全局共享，玩家个人设置，<b>不保存进关卡</b></li>
+              <li>调整后立即生效；<b>已铺区块颜色不变</b></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.4 颜色池；2.3 颜色规则；7.3 默认色板；11.3 颜色池不足</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B8 -->
+    <article class="screen" id="b8">
+      <div class="screen-head">
+        <span class="num">B8</span>
+        <h3>画布 · 0层网格 &amp; 1层限制区域</h3>
+        <span class="pos">流程位置：分层绘制 · 第 1 步</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">0 层 网格</span><span class="muted">空白网格</span></div>
+              <div class="wbody">
+                <div class="mini" style="grid-template-columns:repeat(6,1fr);">
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="lbl">默认显示空白网格；5×5 – 15×15 可调；可显示/隐藏网格线</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">1 层 限制区域</span><span class="muted">铺设地砖</span></div>
+              <div class="wbody">
+                <div class="mini" style="grid-template-columns:repeat(6,1fr);">
+                  <i class="tile"></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                  <i class="tile"></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                  <i></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                  <i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div class="lbl">左键铺地砖 / 右键删地砖</div>
+                <div class="lbl">边框：默认带；相邻地砖间取消；无相邻的边保留</div>
+                <div class="lbl warn">超出网格范围不可铺设</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">左键点击</span><span class="arrow">→</span><span class="to">铺设地砖</span></li>
+              <li><span class="a">左键长按拖拽</span><span class="arrow">→</span><span class="to">批量铺设</span></li>
+              <li><span class="a">右键点击</span><span class="arrow">→</span><span class="to">删除地砖</span></li>
+              <li><span class="a">切到 2 层</span><span class="arrow">→</span><span class="to">B9</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>0 层：空白 / 已调整大小 / 网格线隐藏</li>
+              <li>1 层：地砖铺设中；越界禁止并反馈</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.5.1 0层/1层；4.6.1 操作汇总；4.6.2 实时反馈</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B9 -->
+    <article class="screen" id="b9">
+      <div class="screen-head">
+        <span class="num">B9</span>
+        <h3>画布 · 2层分割线（普通 / 等价 / 非等价）</h3>
+        <span class="pos">流程位置：分层绘制 · 第 2 步</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:320px;">
+            <div class="wbar">
+              <span class="t">2 层 分割线</span>
+              <span class="btn on">普通线</span>
+              <span class="btn">等价线</span>
+              <span class="btn">非等价线</span>
+            </div>
+            <div class="wbody">
+              <div class="mini" style="grid-template-columns:repeat(6,1fr);position:relative;">
+                <i class="tile"></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                <i class="tile"></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                <i></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="lbl" style="margin-top:6px;">普通线：实线（两边不可为同一区块）</div>
+              <div class="lbl">等价线：双线（两边必为相同形状，支持旋转/镜像）</div>
+              <div class="lbl">非等价线：虚线（两边形状必须不同）</div>
+              <div class="lbl warn">等价线两侧形状不同 → 标红；非等价线两侧形状相同 → 标红</div>
+              <div class="lbl warn">放在没有地砖的地方不可放置</div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">选线型</span><span class="arrow">→</span><span class="to">工具栏切换当前线型</span></li>
+              <li><span class="a">左键点击相邻地砖的边</span><span class="arrow">→</span><span class="to">放置分割线</span></li>
+              <li><span class="a">右键点击</span><span class="arrow">→</span><span class="to">删除分割线</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>等价 / 非等价两侧形状校验失败 → 标红</li>
+              <li>无地砖处 → 不可放置</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.5.1 2层；2.1 形状相同判定；2.6 分割线格式（8.2）</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B10 -->
+    <article class="screen" id="b10">
+      <div class="screen-head">
+        <span class="num">B10</span>
+        <h3>画布 · 3层推演（设计师以玩家视角铺区块）</h3>
+        <span class="pos">流程位置：分层绘制 · 第 3 步</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:330px;">
+            <div class="wbar"><span class="t">3 层 推演</span><span class="muted">铺区块 / 换色 / 撤销</span></div>
+            <div class="wbody">
+              <div class="mini" style="grid-template-columns:repeat(6,1fr);">
+                <i class="tile fill"></i><i class="tile fill"></i><i class="tile half"></i><i></i><i></i><i></i>
+                <i class="tile fill"></i><i class="tile half"></i><i class="tile half"></i><i></i><i></i><i></i>
+                <i></i><i class="tile half"></i><i class="tile half"></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="lbl">左键点击=铺一个区块；长按 300ms 拖拽=扫过格子同一区块同色</div>
+              <div class="lbl">拖到已有区块上=覆盖合并；点已有区块=随机换色（排除当前色）</div>
+              <div class="lbl">右键点击=从区块删除该格子（可能触发拆分）</div>
+              <div class="lbl">Ctrl+Z=撤销整次操作（一次用户操作算一步）</div>
+              <div class="lbl warn">实时检测：面积不符数字 / 形状不符图案 / 违反分割线 → 区块标红</div>
+              <div class="lbl">最小单位 1 格；单格区块合法保留；删除后不连通 → 自动拆分</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>“与上一笔不同色”的“上一笔”在<b>跨层切换 / 撤销后重置</b>。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">左键点击 / 长按拖拽</span><span class="arrow">→</span><span class="to">铺设区块（随机色，与上一笔不同）</span></li>
+              <li><span class="a">点已有区块</span><span class="arrow">→</span><span class="to">随机换色（排除当前色）</span></li>
+              <li><span class="a">右键点击格子</span><span class="arrow">→</span><span class="to">删格；不连通则拆分（保留原 ID/色）</span></li>
+              <li><span class="a">Ctrl+Z</span><span class="arrow">→</span><span class="to">撤销一次用户操作</span></li>
+              <li><span class="a">推演层铺满且无违规</span><span class="arrow">→</span><span class="to">解锁发布 → C4</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>违规区块：红色外轮廓（只画区块边界）</li>
+              <li>推演层作为标准答案存入 <code>solution</code></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.5.1 3层；2.3 颜色规则；2.4 撤销粒度；2.5 长按拖拽；4.6 操作与反馈</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B11 -->
+    <article class="screen" id="b11">
+      <div class="screen-head">
+        <span class="num">B11</span>
+        <h3>画布 · 3.5层贴纸（收集型种子）</h3>
+        <span class="pos">流程位置：分层绘制 · 第 3.5 步（仅收集型）</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:330px;">
+            <div class="wbar">
+              <span class="t">3.5 层 贴纸</span>
+              <span class="lbl">种子</span>
+              <span class="btn on">🌸</span><span class="btn">🌿</span><span class="btn">🌰</span>
+            </div>
+            <div class="wbody">
+              <div class="mini" style="grid-template-columns:repeat(6,1fr);">
+                <i class="tile seed" data-e="🌸"></i><i class="tile"></i><i class="tile seed" data-e="🌿"></i><i></i><i></i><i></i>
+                <i class="tile"></i><i class="tile"></i><i class="tile"></i><i></i><i></i><i></i>
+                <i></i><i class="tile seed" data-e="🌰"></i><i class="tile"></i><i></i><i></i><i></i>
+                <i></i><i></i><i></i><i></i><i></i><i></i>
+              </div>
+              <div class="lbl">工具栏选种子 → 点格子放置；右键删除贴纸；每格最多 1 个（放新覆盖旧）</div>
+              <div class="lbl warn">贴纸不可跨区域；每区块须含每种种子各 1 个</div>
+              <div class="lbl">违规区块加红色外轮廓 + 状态栏显示违规区块数量（不显示编号）</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>贴纸只能放在<b>已铺地砖（限制区域）</b>内。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">选种子 + 点格子</span><span class="arrow">→</span><span class="to">放置贴纸</span></li>
+              <li><span class="a">右键格子</span><span class="arrow">→</span><span class="to">删除贴纸</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>违规区块红色外轮廓（不画内部格子边）</li>
+              <li>状态栏仅显示违规区块<b>数量</b></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.5.1 3.5层；4.6.2 实时反馈；2.6 收集型</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- B12 -->
+    <article class="screen" id="b12">
+      <div class="screen-head">
+        <span class="num">B12</span>
+        <h3>实时反馈汇总（状态栏违规摘要 / 多规则分行）</h3>
+        <span class="pos">流程位置：设计模式实时 · 持续</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:340px;">
+            <div class="wbar"><span class="t">状态栏</span><span class="muted">多规则违规摘要</span></div>
+            <div class="wbody">
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="warn">数字型：2 个区块面积不匹配</div>
+                <div class="warn">收集型：1 个区块种子分布不正确</div>
+              </div>
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="muted lbl">仅一类且只有一个违规区块时：</div>
+                <div class="warn">数字型：格子数 5 不在数字列表</div>
+              </div>
+              <div class="box dash pad">
+                <div class="muted lbl">跳过检测的条件：</div>
+                <div class="txt">数字型：数字列表未填满时跳过</div>
+                <div class="txt">形状型：形状未存满时跳过</div>
+                <div class="txt">收集型：不跳过（n 为种子数）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">按提示调整画布</span><span class="arrow">→</span><span class="to">违规消除，状态栏清空</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>填满后所有已铺区块实时检测（铺 1 个查 1 个）</li>
+              <li>违规区块红色外轮廓</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.6.2 实时反馈；5.3 游玩反馈</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- C 草稿箱 · 保存与发布 -->
+  <!-- ============================================================ -->
+  <section class="group" id="gC">
+    <div class="group-title"><span class="idx">C</span><h2>草稿箱 · 保存与发布</h2></div>
+    <p class="group-note">草稿（draft）的版本管理 → 发布（published）。发布后关卡名锁定、写入题库。</p>
+
+    <!-- C1 -->
+    <article class="screen" id="c1">
+      <div class="screen-head">
+        <span class="num">C1</span>
+        <h3>草稿箱列表（含空态 / 每行操作 / 已发布锁定）</h3>
+        <span class="pos">流程位置：C · 入口</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe">
+            <div class="wbar"><span class="btn">← 返回主页</span><span class="t">草稿箱</span></div>
+            <div class="wbody">
+              <div class="box dash pad" style="margin-bottom:10px;">
+                <div class="lbl">空态：暂无草稿，去设计模式保存一个吧</div>
+              </div>
+              <table class="list" style="margin-top:0;">
+                <thead>
+                  <tr><th>关卡名</th><th>版本数</th><th>最后更新</th><th>打开版本</th><th>操作（含 [＋] 新建草稿）</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>关卡A</td><td>3</td><td>2026-10-08 21:00</td>
+                    <td><span class="mono">[ v3 ▾ ]</span></td>
+                    <td>[ 打开 ] [ 重命名 ] [ 另存为 ] [ 删除 ]</td>
+                  </tr>
+                  <tr>
+                    <td>关卡B <span class="chip on">已发布·名称锁定</span></td><td>1</td><td>2026-10-08 20:10</td>
+                    <td><span class="mono">[ v1 ▾ ]</span></td>
+                    <td>[ 打开 ] <span class="btn dis">重命名</span> [ 另存为 ] [ 删除 ]</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="lbl" style="margin-top:6px;">存储结构：草稿箱/&lt;关卡名&gt;/&lt;关卡名&gt;_vN.json（每关独立文件夹，版本递增）</div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ ＋ 新建草稿 ]</span><span class="arrow">→</span><span class="to">B1 设计模式（空白 8×8）</span></li>
+              <li><span class="a">选版本 + [ 打开 ]</span><span class="arrow">→</span><span class="to">B1 设计模式（载入该版本）</span></li>
+              <li><span class="a">[ 重命名 ]</span><span class="arrow">→</span><span class="to">C2 内联编辑（已发布禁用）</span></li>
+              <li><span class="a">[ 另存为 ]</span><span class="arrow">→</span><span class="to">新建版本文件</span></li>
+              <li><span class="a">[ 删除 ]</span><span class="arrow">→</span><span class="to">C3 确认弹窗</span></li>
+              <li><span class="a">[ ← 返回主页 ]</span><span class="arrow">→</span><span class="to">A2 主页</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>有草稿 / 空态</li>
+              <li>draft：名称可编辑；published：名称锁定</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">10.1 草稿箱；9.3 关卡名编辑规则；9.2 关卡状态</p>
+          </div>
+          <div class="ok"><b>已确认</b>打开草稿时<b>需用户手动选择版本</b>（下拉默认最新版，用户可切换）。</div>
+        </div>
+      </div>
+    </article>
+
+    <!-- C2 -->
+    <article class="screen" id="c2">
+      <div class="screen-head">
+        <span class="num">C2</span>
+        <h3>草稿重命名（内联编辑态）</h3>
+        <span class="pos">流程位置：C1 → 重命名</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:340px;">
+            <div class="wbar"><span class="t">草稿箱</span><span class="muted">行内编辑</span></div>
+            <div class="wbody">
+              <table class="list" style="margin-top:0;">
+                <tbody>
+                  <tr>
+                    <td>
+                      <span class="box dash pad mono" style="padding:1px 8px;">关卡A_新名</span>
+                      <span class="btn sm">确定</span>
+                      <span class="btn sm">取消</span>
+                    </td>
+                    <td colspan="4" class="muted lbl">回车确认 / Esc 取消</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>关卡名做合法性校验：<b>空名</b>、<b>与已有草稿重名</b>时禁止保存 / 提示。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 确定 ] / Enter</span><span class="arrow">→</span><span class="to">保存新名并刷新列表</span></li>
+              <li><span class="a">[ 取消 ] / Esc</span><span class="arrow">→</span><span class="to">还原原名</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>草稿箱内可改；画布内可改；<b>已发布不可改</b></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">10.1 草稿箱（重命名）；9.3 关卡名编辑规则</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- C3 -->
+    <article class="screen" id="c3">
+      <div class="screen-head">
+        <span class="num">C3</span>
+        <h3>删除草稿版本 · 确认弹窗</h3>
+        <span class="pos">流程位置：C1 → 删除</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:360px;">
+            <div class="wbar"><span class="t">确认弹窗</span></div>
+            <div class="wbody">
+              <div class="ph" style="height:8px;border:none;background:var(--panel);margin-bottom:8px;">遮罩背景</div>
+              <div class="box dash pad">
+                <div class="txt">确认删除「关卡A」的 v2？此操作不可撤销；若这是最后一个版本，草稿将被移除。</div>
+                <div class="row" style="gap:6px;margin-top:8px;">
+                  <span class="btn solid">删除</span><span class="btn">取消</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 删除 ]</span><span class="arrow">→</span><span class="to">删除该版本 → 刷新 C1</span></li>
+              <li><span class="a">[ 取消 ] / 点遮罩</span><span class="arrow">→</span><span class="to">关闭弹窗</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>删除最后一个版本 → 整个草稿被移除</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">10.1 草稿箱（删除）</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- C4 -->
+    <article class="screen" id="c4">
+      <div class="screen-head">
+        <span class="num">C4</span>
+        <h3>发布确认弹窗（未验证提示）</h3>
+        <span class="pos">流程位置：B1 工具栏 → 发布</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:360px;">
+            <div class="wbar"><span class="t">发布确认</span></div>
+            <div class="wbody">
+              <div class="ph" style="height:8px;border:none;background:var(--panel);margin-bottom:8px;">遮罩背景</div>
+              <div class="box dash pad">
+                <div class="txt">此关卡未经验证，可能有多个解或无解，确认发布？</div>
+                <div class="row" style="gap:6px;margin-top:8px;">
+                  <span class="btn solid">发布</span><span class="btn">取消</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="tbd"><b>待确认</b>本版本无自动验证（Z3 已砍），“未验证”为固定文案；若未来接入验证，文案与流程如何变化待定。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 发布 ]</span><span class="arrow">→</span><span class="to">写题库（published）→ C6</span></li>
+              <li><span class="a">[ 取消 ]</span><span class="arrow">→</span><span class="to">回到设计模式画布</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>前置条件</h5>
+            <ul>
+              <li>必须先保存（currentVersion &gt; 0），否则发布按钮禁用</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.7.4 保存；9.2 关卡状态</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- C5 -->
+    <article class="screen" id="c5">
+      <div class="screen-head">
+        <span class="num">C5</span>
+        <h3>发布门槛失败（推演层未铺满 / 存在违规区块）</h3>
+        <span class="pos">流程位置：C4 → 校验失败</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">失败·未铺满</span></div>
+              <div class="wbody">
+                <div class="box dash pad">
+                  <div class="txt">推演层必须占满限制区域，未填满视为未完成，拒绝发布。</div>
+                  <div class="lbl warn">还差 N 格</div>
+                  <div class="row" style="gap:6px;margin-top:8px;"><span class="btn">返回画布</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">失败·存在违规区块</span></div>
+              <div class="wbody">
+                <div class="box dash pad">
+                  <div class="txt">推演层存在违规区块（红边框），拒绝发布。</div>
+                  <div class="lbl warn">请先修正标红区块</div>
+                  <div class="row" style="gap:6px;margin-top:8px;"><span class="btn">返回画布</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>未填满是<b>硬拦截</b>：推演层未铺满限制区域即拒绝发布（含数字未填满 / 形状未存满的情形）。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 返回画布 ]</span><span class="arrow">→</span><span class="to">B10 修正推演层后重试发布</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>推演层未铺满 / 有违规区块 → 拒绝发布</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.7.4 保存（发布门槛）</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- C6 -->
+    <article class="screen" id="c6">
+      <div class="screen-head">
+        <span class="num">C6</span>
+        <h3>发布成功（status = published / 名称锁定）</h3>
+        <span class="pos">流程位置：C4 → 发布成功</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:420px;">
+            <div class="wbar">
+              <span class="t">设计模式工具栏</span>
+              <span class="box dash pad" style="padding:1px 10px;">关卡名（禁用）</span>
+              <span class="btn dis">发布</span>
+              <span class="chip on">已发布</span>
+              <span class="lbl">名称锁定不可修改</span>
+            </div>
+            <div class="wbody">
+              <div class="lbl">发布后：关卡出现在题库（E1），可直接游玩</div>
+              <div class="lbl">推演层作为标准答案存入 <code>solution</code> 字段</div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">继续编辑</span><span class="arrow">→</span><span class="to">B1（可再保存新版本）</span></li>
+              <li><span class="a">去题库查看</span><span class="arrow">→</span><span class="to">E1 题库列表</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>published：名称锁定；重复发布同名关卡视为同一题目更新，按关卡名覆盖题库文件</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">4.7.4 保存；9.2/9.3；10.2 题库</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- E 题库与游玩 -->
+  <!-- ============================================================ -->
+  <section class="group" id="gE">
+    <div class="group-title"><span class="idx">E</span><h2>题库与游玩</h2></div>
+    <p class="group-note">题库即关卡列表（published 集合）；每行进入游玩视图。</p>
+
+    <!-- E1 -->
+    <article class="screen" id="e1">
+      <div class="screen-head">
+        <span class="num">E1</span>
+        <h3>题库列表（筛选 · 排序 · 通关状态 · 行操作）</h3>
+        <span class="pos">流程位置：E · 入口</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe">
+            <div class="wbar"><span class="btn">← 返回主页</span><span class="t">题库</span></div>
+            <div class="wbody">
+              <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+                <span class="lbl">难度 [ 全部 ▾ ]</span>
+                <span class="lbl">规则类型 [ 全部 ▾ ]</span>
+                <span class="lbl">网格大小 [ 全部 ▾ ]</span>
+                <span class="btn">导入 JSON</span>
+                <span class="btn">导出通关记录</span>
+              </div>
+              <table class="list" style="margin-top:0;">
+                <thead>
+                  <tr>
+                    <th>关卡名</th><th>难度 ↑</th><th>规则类型</th><th>网格</th>
+                    <th>通关</th><th>最短时长</th><th>最后更新</th><th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>关卡A</td><td>1</td><td>数字型</td><td>8 × 8</td>
+                    <td>✓</td><td>05:12</td><td>2026-10-08 21:00</td>
+                    <td>[ 游玩 ] [ 导出 ] [ 导出 EXE ] [ 删除 ]</td>
+                  </tr>
+                  <tr>
+                    <td>关卡C</td><td>3</td><td>收集型</td><td>10 × 10</td>
+                    <td>—</td><td>—</td><td>2026-10-08 19:40</td>
+                    <td>[ 游玩 ] [ 导出 ] [ 导出 EXE ] [ 删除 ]</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div class="lbl" style="margin-top:6px;">默认按难度从易到难；表头「难度」可点切换升/降序</div>
+              <div class="lbl">draft 不在题库显示；不锁定，所有已发布关卡自由进入</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>题库与草稿箱均<b>滚动加载</b>。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">切换筛选 / 排序</span><span class="arrow">→</span><span class="to">刷新列表</span></li>
+              <li><span class="a">[ 游玩 ]</span><span class="arrow">→</span><span class="to">E5 游玩视图</span></li>
+              <li><span class="a">[ 导出 ]</span><span class="arrow">→</span><span class="to">E4 导出 JSON</span></li>
+              <li><span class="a">[ 导出 EXE ]</span><span class="arrow">→</span><span class="to">E4 单关卡 EXE</span></li>
+              <li><span class="a">[ 删除 ]</span><span class="arrow">→</span><span class="to">确认弹窗 → 从题库移除</span></li>
+              <li><span class="a">[ 导入 JSON ]</span><span class="arrow">→</span><span class="to">E3</span></li>
+              <li><span class="a">[ 导出通关记录 ]</span><span class="arrow">→</span><span class="to">E4</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>通关：✓ + 最短时长（分:秒）</li>
+              <li>未通关：不锁定，可进入</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">5.1 关卡列表（已合并进题库）；10.2 题库；10.5</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E2 -->
+    <article class="screen" id="e2">
+      <div class="screen-head">
+        <span class="num">E2</span>
+        <h3>题库空态（无数据 / 筛选无结果）</h3>
+        <span class="pos">流程位置：E1 空数据分支</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:380px;">
+            <div class="wbar"><span class="btn">← 返回主页</span><span class="t">题库</span></div>
+            <div class="wbody">
+              <div class="box dash pad" style="text-align:center;padding:22px;margin-bottom:8px;">
+                <div class="lbl muted">题库为空：暂无已发布关卡</div>
+                <div class="lbl muted">发布关卡后会出现在这里</div>
+              </div>
+              <div class="box dash pad" style="text-align:center;padding:22px;">
+                <div class="lbl muted">筛选无结果：没有符合当前筛选条件的关卡</div>
+              </div>
+              <div class="lbl" style="margin-top:6px;">两种空态使用<b>不同文案</b></div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>「筛选无结果」与「题库为空」使用<b>不同文案</b>。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 导入 JSON ]</span><span class="arrow">→</span><span class="to">E3</span></li>
+              <li><span class="a">[ ← 返回主页 ]</span><span class="arrow">→</span><span class="to">A2 主页 → 草稿箱设计关卡</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>无数据（首次使用） / 筛选无结果</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">5.1 只显示 published；四、产品结构</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E3 -->
+    <article class="screen" id="e3">
+      <div class="screen-head">
+        <span class="num">E3</span>
+        <h3>导入 JSON（成功 / 重名自动加后缀）</h3>
+        <span class="pos">流程位置：E1 → 导入</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:380px;">
+            <div class="wbar"><span class="t">导入 JSON</span><span class="muted">系统文件选择对话框</span></div>
+            <div class="wbody">
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="lbl">成功：导入的关卡直接写入题库（published），可立即游玩</div>
+              </div>
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="lbl">重名：自动加「_导入」后缀</div>
+                <div class="txt mono muted">关卡A → 关卡A_导入</div>
+              </div>
+              <div class="box dash pad">
+                <div class="lbl">失败：文件格式非法 / 无法解析</div>
+                <div class="warn">提示导入失败原因</div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>导入的关卡<b>不进草稿箱</b>，直接写入题库（published）。</div>
+          <div class="tbd"><b>待确认</b>导入<b>失败</b>时的具体提示文案仍待确认。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">选择文件</span><span class="arrow">→</span><span class="to">成功：刷新 E1 并可游玩</span></li>
+              <li><span class="a">非法文件</span><span class="arrow">→</span><span class="to">停留 E1 + 失败提示</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>成功 / 重名改名 / 失败</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">6.5 导出格式（导入说明）；8.1 Level</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E4 -->
+    <article class="screen" id="e4">
+      <div class="screen-head">
+        <span class="num">E4</span>
+        <h3>导出（关卡 JSON / 单关卡 EXE / 通关记录）</h3>
+        <span class="pos">流程位置：E1 → 导出</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="row" style="gap:12px;flex-wrap:wrap;">
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">导出关卡 JSON</span></div>
+              <div class="wbody">
+                <div class="lbl">[ 导出 ] → 保存对话框 → 生成 level.json</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:250px;">
+              <div class="wbar"><span class="t">导出单关卡 EXE</span></div>
+              <div class="wbody">
+                <div class="lbl">[ 导出 EXE ] → 选择文件夹 → 生成：</div>
+                <div class="txt mono">关卡1/</div>
+                <div class="txt mono">&nbsp;&nbsp;├ 涂解播放器.exe（通用）</div>
+                <div class="txt mono">&nbsp;&nbsp;└ level.json</div>
+              </div>
+            </div>
+            <div class="wframe narrow" style="min-width:230px;">
+              <div class="wbar"><span class="t">导出通关记录</span></div>
+              <div class="wbody">
+                <div class="lbl">[ 导出通关记录 ] → 汇总所有记录为单个 JSON</div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>导出失败时提示「导出失败」。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 导出 ] / [ 导出 EXE ] / [ 导出通关记录 ]</span><span class="arrow">→</span><span class="to">系统保存对话框 → 文件落盘</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>EXE 仅<b>已发布</b>关卡可导出（入口在题库行内）</li>
+              <li>播放器读<b>同目录</b> level.json；找不到则提示放置关卡文件</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">6.5 导出格式；8.3 PlayRecord</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E5 -->
+    <article class="screen" id="e5">
+      <div class="screen-head">
+        <span class="num">E5</span>
+        <h3>游玩视图（计时 · 规则提示区 · 画布 · 齿轮 → 颜色池面板）</h3>
+        <span class="pos">流程位置：E1 → 游玩</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe">
+            <div class="wbar">
+              <span class="t">游玩：关卡A</span>
+              <span class="chip">⏱ 00:00</span>
+              <span class="btn">撤销</span>
+              <span class="btn">返回题库</span>
+              <span style="margin-left:auto;" class="btn">⚙ 齿轮（右上角）</span>
+            </div>
+            <div class="wbody">
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="lbl">规则提示区（画布上方或侧边）</div>
+                <div class="txt">数字型：数字列表 [2,3,4] ｜ 形状型：形状缩略图 ｜ 收集型：种子 emoji</div>
+              </div>
+              <div class="ph tall" style="min-height:200px;">游戏画布占位<br><span class="muted">网格 + 限制区域 + 分割线 + 数字/形状/种子；隐藏唯一解答案</span></div>
+              <div class="lbl" style="margin-top:6px;">左键铺 / 长按拖拽连铺 / 右键删格 / 点区块换色 / Ctrl+Z 撤销</div>
+            </div>
+          </div>
+          <div class="wframe narrow" style="min-width:220px;margin-top:10px;">
+            <div class="wbar"><span class="t">齿轮弹出</span><span class="muted">颜色池面板</span></div>
+            <div class="wbody">
+              <div class="txt">■ ■ ■ ■ ■ ■ ■ ■</div>
+              <div class="lbl">已选 8 / 8 色 · 至少保留 2 色</div>
+              <div class="lbl">点面板外区域关闭</div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">铺区块 / 删格 / 换色 / 撤销</span><span class="arrow">→</span><span class="to">停留，实时反馈</span></li>
+              <li><span class="a">[ ⚙ ]</span><span class="arrow">→</span><span class="to">弹出颜色池面板（点外部关闭）</span></li>
+              <li><span class="a">全部填满 + 符合规则</span><span class="arrow">→</span><span class="to">E6 通关</span></li>
+              <li><span class="a">全部填满 + 不符合规则</span><span class="arrow">→</span><span class="to">E7 答案不对</span></li>
+              <li><span class="a">[ 返回题库 ]</span><span class="arrow">→</span><span class="to">E1</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>计时：进入关卡开始，通关停止</li>
+              <li>违规：面积/形状不符 → 区块标红；种子违规 → 红色外轮廓 + 数量提示</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">5.2 游戏画布；5.3 操作与反馈；2.3 颜色规则</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E6 -->
+    <article class="screen" id="e6">
+      <div class="screen-head">
+        <span class="num">E6</span>
+        <h3>通关成功（横幅 · 记录最短时长）</h3>
+        <span class="pos">流程位置：E5 → 通关</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:420px;">
+            <div class="wbar"><span class="t">游玩：关卡A</span><span class="chip">⏱ 05:12</span><span class="btn">返回题库</span></div>
+            <div class="wbody">
+              <div class="box pad" style="text-align:center;margin-bottom:8px;">
+                <div class="txt"><b>🎉 通关！用时 05:12</b></div>
+                <div class="lbl">（若此前有记录，显示“最短 xx:xx”）</div>
+                <div style="margin-top:6px;"><span class="btn">返回题库</span></div>
+              </div>
+              <div class="lbl">通关动画 / 音效：目前没做</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>通关动画 / 音效<b>目前没做</b>（后续再定）。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 返回题库 ]</span><span class="arrow">→</span><span class="to">E1（该行显示 ✓ + 最短时长）</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul>
+              <li>首次通关：保存状态 + 时长</li>
+              <li>再次通关：更短则更新，否则保留原记录</li>
+              <li>记录保存在本地（播放器为 localStorage；主程序为 records）</li>
+            </ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">5.4 通关判定；8.3 PlayRecord</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- E7 -->
+    <article class="screen" id="e7">
+      <div class="screen-head">
+        <span class="num">E7</span>
+        <h3>答案不对（全部填满但不符合规则）</h3>
+        <span class="pos">流程位置：E5 → 校验失败</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:380px;">
+            <div class="wbar"><span class="t">游玩：关卡A</span><span class="chip">⏱ 03:40</span></div>
+            <div class="wbody">
+              <div class="ph tall" style="min-height:160px;">画布占位<br><span class="muted">全部填满，但不符合规则</span></div>
+              <div class="box dash pad" style="margin-top:8px;">
+                <div class="warn">答案不对，再试试</div>
+                <div class="lbl">违规区块标红 / 红色外轮廓；计时继续</div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>「答案不对」仅在<b>画面填满（推演层铺满地砖）且答案不对</b>时出现；未填满不触发判定。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">继续调整区块</span><span class="arrow">→</span><span class="to">回到 E5 解谜</span></li>
+              <li><span class="a">[ 返回题库 ]</span><span class="arrow">→</span><span class="to">E1</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>全部填满 + 不符合规则 → 提示；未填满 → 不触发</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">5.4 通关判定</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- F 异常与边界状态 -->
+  <!-- ============================================================ -->
+  <section class="group" id="gF">
+    <div class="group-title"><span class="idx">F</span><h2>异常与边界状态</h2></div>
+    <p class="group-note">首次使用、无数据已在 A / C1 / E2 覆盖；此处保留文件损坏的两种处理，无网络卡顿 / 加载中 / 权限申请状态（均不适用）。</p>
+
+    <!-- F1 -->
+    <article class="screen" id="f1">
+      <div class="screen-head">
+        <span class="num">F1</span>
+        <h3>关卡文件损坏（询问删除）</h3>
+        <span class="pos">流程位置：打开草稿 / 游玩关卡时</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:400px;">
+            <div class="wbar"><span class="t">异常弹窗</span></div>
+            <div class="wbody">
+              <div class="ph" style="height:8px;border:none;background:var(--panel);margin-bottom:8px;">遮罩背景</div>
+              <div class="box dash pad">
+                <div class="warn">关卡文件已损坏，无法打开。是否删除该文件？</div>
+                <div class="row" style="gap:6px;margin-top:8px;">
+                  <span class="btn solid">删除</span><span class="btn">取消</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>文件损坏时<b>按情况提示</b>；损坏文件提供「删除」入口（无“网络卡顿”场景）。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">[ 删除 ]</span><span class="arrow">→</span><span class="to">删除文件 → 返回来源列表（C1 / E1）</span></li>
+              <li><span class="a">[ 取消 ]</span><span class="arrow">→</span><span class="to">关闭弹窗，文件保留，返回上一页</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>文件损坏（永久打不开）</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">11.1 关卡文件加载失败</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- F2 -->
+    <article class="screen" id="f2">
+      <div class="screen-head">
+        <span class="num">F2</span>
+        <h3>扫描发现损坏文件（跳过 + 提供删除）</h3>
+        <span class="pos">流程位置：进入题库 / 草稿箱 · 刷新列表时</span>
+      </div>
+      <div class="screen-body">
+        <div class="wire">
+          <div class="wframe narrow" style="min-width:420px;">
+            <div class="wbar"><span class="t">题库</span></div>
+            <div class="wbody">
+              <div class="box dash pad" style="margin-bottom:8px;">
+                <div class="warn">检测到 2 个损坏文件已跳过：关卡X.json、关卡Y.json</div>
+                <div class="row" style="gap:6px;margin-top:8px;">
+                  <span class="btn solid">删除损坏文件</span><span class="btn">忽略</span>
+                </div>
+              </div>
+              <div class="lbl">其余正常关卡照常显示，可继续游玩</div>
+            </div>
+          </div>
+          <div class="ok"><b>已确认</b>扫描到的损坏文件提供「删除」入口。</div>
+        </div>
+        <div class="notes">
+          <div class="sec"><h5>可执行操作 → 去向</h5>
+            <ul class="nav-list">
+              <li><span class="a">继续使用题库 / 草稿箱</span><span class="arrow">→</span><span class="to">正常列表照常显示</span></li>
+              <li><span class="a">[ 删除损坏文件 ]</span><span class="arrow">→</span><span class="to">移除损坏项，刷新列表</span></li>
+            </ul>
+          </div>
+          <div class="sec"><h5>涉及状态</h5>
+            <ul><li>部分失败：跳过损坏项，不影响其余数据</li></ul>
+          </div>
+          <div class="sec"><h5>PRD 依据</h5>
+            <p class="prd">11.1 关卡文件加载失败</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 决策记录与遗留项 -->
+  <!-- ============================================================ -->
+  <section class="group" id="tbd">
+    <div class="group-title"><span class="idx">!</span><h2>决策记录与遗留项</h2></div>
+    <p class="group-note">你已对原型中 23 条「待确认」逐条给出答复，下表记录已达成的决策（原型已按此同步）。仅余 3 条因答复为“按情况 / 未来待定”而仍保留「待确认」。</p>
+
+    <div class="sub-title">一、已确认决策（原型已同步）</div>
+    <table class="list">
+      <thead><tr><th>编号</th><th>原待确认点</th><th>你的决策</th></tr></thead>
+      <tbody>
+        <tr><td class="id">T1</td><td>入口页 / 主页形态</td><td>启动即主页（草稿箱、题库、存储位置入口页面），无独立启动画面。</td></tr>
+        <tr><td class="id">T2</td><td>首次使用与普通启动是否区分</td><td>不做区分，首次使用与普通启动一致。</td></tr>
+        <tr><td class="id">T3</td><td>修改存储路径后是否迁移</td><td>自动迁移，且不覆盖新位置已存在的文件。</td></tr>
+        <tr><td class="id">T4</td><td>“下一步”按钮的含义</td><td>不是按钮，而是描述（如“选满 n 种种子后，可解锁 3.5 层工具栏，出现种子按钮”），已从原型移除按钮。</td></tr>
+        <tr><td class="id">T5</td><td>形状网格画布能否调整大小</td><td>形状型的选择画布不能调整范围；可调整的是设计画布。</td></tr>
+        <tr><td class="id">T6</td><td>“选满种子”与“放置贴纸”先后</td><td>先后关系明确：先“选满种子”，再“放置贴纸”。</td></tr>
+        <tr><td class="id">T7</td><td>“与上一笔不同色”的“上一笔”</td><td>在跨层切换 / 撤销后即重置。</td></tr>
+        <tr><td class="id">T8</td><td>贴纸可放位置</td><td>贴纸只能放在已铺地砖内。</td></tr>
+        <tr><td class="id">T9</td><td>打开草稿时的默认版本</td><td>需用户手动选择版本。</td></tr>
+        <tr><td class="id">T10</td><td>关卡名合法性校验</td><td>校验空名 / 与已有草稿重名。</td></tr>
+        <tr><td class="id">T11</td><td>发布门槛是否拦截</td><td>未填满是硬拦截。</td></tr>
+        <tr><td class="id">T12</td><td>测试区（PRD 4.8）</td><td>没有测试区，测试区与题库重叠，已取消（原型 D 组整组删除）。</td></tr>
+        <tr><td class="id">T13</td><td>题库 / 草稿分页</td><td>都需要滚动加载。</td></tr>
+        <tr><td class="id">T14</td><td>空态文案</td><td>“筛选无结果”与“题库为空”使用不同文案。</td></tr>
+        <tr><td class="id">T15</td><td>导入后去向</td><td>导入不进草稿箱，直接写入题库。</td></tr>
+        <tr><td class="id">T16</td><td>导出失败处理</td><td>提示“导出失败”。</td></tr>
+        <tr><td class="id">T17</td><td>通关动画 / 音效</td><td>目前没做。</td></tr>
+        <tr><td class="id">T18</td><td>“答案不对”提示触发条件</td><td>只在画面填满（对应推演层填满地砖）且答案不对时出现。</td></tr>
+        <tr><td class="id">T19</td><td>文件损坏的判定</td><td>按情况提示。</td></tr>
+        <tr><td class="id">T20</td><td>“网络卡顿”场景</td><td>没有网络卡顿（本地桌面应用，不适用）。</td></tr>
+        <tr><td class="id">T21</td><td>损坏文件是否可清理</td><td>提供删除入口。</td></tr>
+        <tr><td class="id">T22</td><td>加载中状态</td><td>不需要加载表现。</td></tr>
+        <tr><td class="id">T23</td><td>应用内权限申请</td><td>权限申请无用（桌面应用无应用内权限流程，选择文件夹走系统对话框）。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub-title" style="margin-top:16px;">二、遗留待确认</div>
+    <table class="list">
+      <thead><tr><th>编号</th><th>所在屏</th><th>待确认内容</th></tr></thead>
+      <tbody>
+        <tr><td class="id">L1</td><td>E3 导入</td><td>导入失败时的具体提示文案（你已确认“导入不进草稿箱”，但失败提示文案仍待定）。</td></tr>
+        <tr><td class="id">L2</td><td>F1 损坏文件</td><td>文件损坏“按情况提示”具体分几种情况，以及每种情况的提示文案（你已确认可删除，但分情况文案仍待定）。</td></tr>
+        <tr><td class="id">L3</td><td>C5 发布确认</td><td>本版本无自动验证（Z3 已砍），“此关卡未经验证”为固定文案；若未来接入验证，文案与流程如何变化仍待定。</td></tr>
+      </tbody>
+    </table>
+    <p class="group-note" style="margin-top:12px;">
+      除上表 L1 / L2 / L3 外，其余 PRD 未明确之处均已由你的答复确定，原型已按决策同步，未自行补全功能。
+    </p>
+  </section>
+
+  <div class="foot">
+    涂解 · 低保真原型 prototype_000 ｜ 依据 PRD v0.8 生成 ｜ 单文件，无外部依赖，可直接在浏览器打开
+  </div>
+
+</main>
+</div>
+</body>
+</html>
