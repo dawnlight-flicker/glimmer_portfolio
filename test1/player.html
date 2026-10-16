@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>涂解播放器</title>
+  <title>play</title>
   <style>
 /* 涂解播放器样式（绿野研习风格，与设计工具游玩视图一致） */
 :root {
@@ -77,6 +77,13 @@ body {
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* 切换按钮激活态（删除模式） */
+.btn.btn-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .play-win-banner {
@@ -233,6 +240,10 @@ body {
 .play-canvas {
   background: var(--paper);
   border: 1px solid var(--line);
+  /* 触屏：画布内触摸不走滚动/缩放，避免吞掉绘制手势；同时禁用长按选中 */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .play-hint {
@@ -372,6 +383,7 @@ body {
         <span v-if="levelQueue.length > 1" class="play-progress">第 {{ currentIndex + 1 }} / {{ levelQueue.length }} 关</span>
         <span class="play-timer">⏱ {{ formatDuration(elapsed) }}</span>
         <button class="btn" :disabled="undoStack.length === 0" @click="undo">撤销</button>
+        <button class="btn" :class="{ 'btn-active': eraseMode }" @click="eraseMode = !eraseMode">🧹 删除</button>
       </header>
       <!-- 通关横幅 -->
       <div v-if="completed" class="play-win-banner">
@@ -500,13 +512,14 @@ body {
             :width="cellSize"
             :height="cellSize"
             fill="transparent"
-            @mousedown.prevent="onCellMouseDown(c.x, c.y, $event)"
-            @mouseenter="onCellEnter(c.x, c.y)"
+            :data-x="c.x"
+            :data-y="c.y"
+            @pointerdown.prevent="onCellPointerDown(c.x, c.y, $event)"
             @contextmenu.prevent.stop="removeBlock(c.x, c.y)"
           />
         </svg>
       </div>
-      <p class="play-hint">左键点击铺区块 / 点已有区块换色 / 长按或拖动连铺 / 右键删格子 / Ctrl+Z 撤销</p>
+      <p class="play-hint">点击铺色 / 点区块换色 / 拖动连铺 / 双击删格 / 🧹删除模式可连删 / Ctrl+Z 撤销（电脑）</p>
 
       <!-- 下一关弹窗 -->
       <div v-if="nextLevelVisible" class="modal-mask">
@@ -695,7 +708,8 @@ createApp({
   setup() {
     const level = ref(null);
     const loadError = ref("");
-    const cellSize = 40;
+    // 屏宽响应：手机窄屏时格子自动缩小
+    const viewportW = ref(window.innerWidth);
 
     // 游玩画布状态
     const blocks = ref({});
@@ -726,7 +740,13 @@ createApp({
     }
 
     const gridSize = computed(() => level.value?.grid_size ?? 0);
-    const canvasSize = computed(() => gridSize.value * cellSize);
+    // 格子尺寸：桌面固定 40，窄屏按（屏宽 - 边距）/ 格数缩小，下限 24
+    const cellSize = computed(() => {
+      const g = gridSize.value;
+      if (!g) return 40;
+      return Math.max(24, Math.min(40, Math.floor((viewportW.value - 32) / g)));
+    });
+    const canvasSize = computed(() => gridSize.value * cellSize.value);
     const tileSet = computed(() => new Set((level.value?.restriction_tiles ?? []).map(([x, y]) => `${x},${y}`)));
 
     function hasTile(x, y) {
@@ -749,7 +769,7 @@ createApp({
     );
 
     const tileBorders = computed(() => {
-      const cs = cellSize;
+      const cs = cellSize.value;
       const result = [];
       for (const { x, y, key } of tileList.value) {
         if (!hasTile(x, y - 1)) result.push({ key: `${key}-t`, x1: x * cs, y1: y * cs, x2: (x + 1) * cs, y2: y * cs });
@@ -761,7 +781,7 @@ createApp({
     });
 
     const dividerRenderList = computed(() => {
-      const cs = cellSize;
+      const cs = cellSize.value;
       return (level.value?.dividers ?? []).map((d) => {
         const [x, y] = d.cell;
         const key = `${x},${y},${d.direction}`;
@@ -775,7 +795,7 @@ createApp({
     });
 
     const stickerRenderList = computed(() => {
-      const cs = cellSize;
+      const cs = cellSize.value;
       return (level.value?.stickers ?? []).map((s, i) => {
         const [x, y] = s.cell;
         return { key: `${x},${y},${i}`, emoji: s.seed, cx: x * cs + cs / 2, cy: y * cs + cs / 2, size: cs * 0.6 };
@@ -783,7 +803,7 @@ createApp({
     });
 
     const blockRenderList = computed(() => {
-      const cs = cellSize;
+      const cs = cellSize.value;
       return Object.entries(blocks.value).map(([key, blockId]) => {
         const [x, y] = key.split(",").map(Number);
         return { key, color: blockColors.value[blockId] ?? "#ccc", px: x * cs, py: y * cs, w: cs, h: cs };
@@ -837,13 +857,20 @@ createApp({
       lastBlockId = id;
     }
 
+    // 仅删除格子（不记录撤销），供连删复用
+    function eraseCell(x, y) {
+      const key = tileKey(x, y);
+      if (!(key in blocks.value)) return;
+      const oldId = blocks.value[key];
+      delete blocks.value[key];
+      splitDisconnectedBlocks(oldId);
+    }
+
     function removeBlock(x, y) {
       const key = tileKey(x, y);
       if (!(key in blocks.value)) return;
       pushUndo();
-      const oldId = blocks.value[key];
-      delete blocks.value[key];
-      splitDisconnectedBlocks(oldId);
+      eraseCell(x, y);
     }
 
     // 删除格子后检查连通性，断开则拆分为多个区块（第一部分保留原 ID/颜色）
@@ -893,13 +920,37 @@ createApp({
       }
     }
 
-    // === 拖拽：长按 300ms 或移动触发，整次拖拽算一步撤销 ===
+    // === 删除模式（手机/桌面通用）：开启后点格子=删除，按住拖动可连删 ===
+    const eraseMode = ref(false);
+    let eraseDragActive = false;
+    let eraseDragUndoPushed = false;
+
+    // 连删：整次拖动只记一步撤销
+    function eraseWithLazyUndo(x, y) {
+      const key = tileKey(x, y);
+      if (!(key in blocks.value)) return;
+      if (!eraseDragUndoPushed) {
+        pushUndo();
+        eraseDragUndoPushed = true;
+      }
+      eraseCell(x, y);
+    }
+
+    // === 拖拽：Pointer Events 统一鼠标/触屏；长按 300ms 或移动触发连铺，整次拖拽算一步撤销 ===
     let dragState = null; // { startX, startY, dragging, blockId, cells, lastX, lastY }
     let dragTimer = null;
+    let lastTapKey = null;
+    let lastTapTime = 0;
 
-    function onCellMouseDown(x, y, event) {
+    function onCellPointerDown(x, y, event) {
       if (event.button !== 0) return;
       if (!hasTile(x, y)) return;
+      if (eraseMode.value) {
+        eraseDragActive = true;
+        eraseDragUndoPushed = false;
+        eraseWithLazyUndo(x, y);
+        return;
+      }
       dragState = { startX: x, startY: y, dragging: false, blockId: 0, cells: new Set(), lastX: x, lastY: y };
       dragTimer = setTimeout(() => {
         if (dragState && !dragState.dragging) startDrag();
@@ -924,34 +975,86 @@ createApp({
       blocks.value[startKey] = dragState.blockId;
     }
 
+    // 从上一格逐步推进到目标格，避免快速滑动跳格导致断连
     function onCellEnter(x, y) {
       if (!dragState) return;
       if (!dragState.dragging) {
         if (dragTimer) { clearTimeout(dragTimer); dragTimer = null; }
         startDrag();
       }
-      if (!dragState || !dragState.dragging) return;
       if (!hasTile(x, y)) return;
-      const key = tileKey(x, y);
-      if (dragState.cells.has(key)) return;
-      const dx = Math.abs(x - dragState.lastX);
-      const dy = Math.abs(y - dragState.lastY);
-      if (dx + dy !== 1) return;
-      dragState.cells.add(key);
-      blocks.value[key] = dragState.blockId;
-      dragState.lastX = x;
-      dragState.lastY = y;
+      let cx = dragState.lastX;
+      let cy = dragState.lastY;
+      let guard = 0;
+      while ((cx !== x || cy !== y) && guard++ < 200) {
+        if (cx !== x) cx += Math.sign(x - cx);
+        else cy += Math.sign(y - cy);
+        if (!hasTile(cx, cy)) break;
+        const key = tileKey(cx, cy);
+        if (!dragState.cells.has(key)) {
+          dragState.cells.add(key);
+          blocks.value[key] = dragState.blockId;
+        }
+      }
+      dragState.lastX = cx;
+      dragState.lastY = cy;
     }
 
-    function onDragMouseUp(event) {
+    // 由指针坐标反推格子（触屏拖动时逐格事件不可靠，统一用 elementFromPoint）
+    function cellFromEvent(event) {
+      const el = document.elementFromPoint(event.clientX, event.clientY);
+      if (!el || !el.dataset || el.dataset.x === undefined) return null;
+      return { x: Number(el.dataset.x), y: Number(el.dataset.y) };
+    }
+
+    function onDocPointerMove(event) {
+      if (eraseDragActive) {
+        const c = cellFromEvent(event);
+        if (c) eraseWithLazyUndo(c.x, c.y);
+        return;
+      }
+      if (!dragState) return;
+      const c = cellFromEvent(event);
+      if (c) onCellEnter(c.x, c.y);
+    }
+
+    function onDocPointerUp(event) {
+      if (eraseDragActive) {
+        eraseDragActive = false;
+        return;
+      }
       if (event.button !== 0) return;
       if (!dragState) return;
       if (dragTimer) { clearTimeout(dragTimer); dragTimer = null; }
       if (!dragState.dragging) {
-        // 300ms 内松开且没移动 → 点击铺单格
-        placeBlock(dragState.startX, dragState.startY);
+        // 300ms 内松开且没移动 → 视为点击（含双击删除判定）
+        handleTap(dragState.startX, dragState.startY);
       }
       dragState = null;
+    }
+
+    function onDocPointerCancel() {
+      eraseDragActive = false;
+      if (dragTimer) { clearTimeout(dragTimer); dragTimer = null; }
+      dragState = null;
+    }
+
+    // 单击铺色/换色；350ms 内同格双击 → 删除该格（手机双击同样生效）
+    function handleTap(x, y) {
+      const key = tileKey(x, y);
+      const now = Date.now();
+      if (lastTapKey === key && now - lastTapTime < 350) {
+        lastTapKey = null;
+        removeBlock(x, y);
+        return;
+      }
+      lastTapKey = key;
+      lastTapTime = now;
+      placeBlock(x, y);
+    }
+
+    function onViewportResize() {
+      viewportW.value = window.innerWidth;
     }
 
     // === 计时器 / 通关判定 / 最短记录（localStorage） ===
@@ -1143,7 +1246,7 @@ createApp({
     });
 
     const violationBorders = computed(() => {
-      const cs = cellSize;
+      const cs = cellSize.value;
       const result = [];
       const violated = violatedBlockIds.value;
       if (violated.size === 0) return result;
@@ -1287,14 +1390,20 @@ createApp({
     }
 
     onMounted(() => {
-      document.addEventListener("mouseup", onDragMouseUp);
+      document.addEventListener("pointermove", onDocPointerMove);
+      document.addEventListener("pointerup", onDocPointerUp);
+      document.addEventListener("pointercancel", onDocPointerCancel);
       document.addEventListener("keydown", onKeyDown);
+      window.addEventListener("resize", onViewportResize);
       load();
     });
 
     onUnmounted(() => {
-      document.removeEventListener("mouseup", onDragMouseUp);
+      document.removeEventListener("pointermove", onDocPointerMove);
+      document.removeEventListener("pointerup", onDocPointerUp);
+      document.removeEventListener("pointercancel", onDocPointerCancel);
       document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("resize", onViewportResize);
       stopTimer();
     });
 
@@ -1327,8 +1436,8 @@ createApp({
       undo,
       placeBlock,
       removeBlock,
-      onCellMouseDown,
-      onCellEnter,
+      eraseMode,
+      onCellPointerDown,
       formatDuration,
       ruleTypeLabel,
       shapePreview,
