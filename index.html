@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品集</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
+
+<style>
+  :root {
+    --page-bg: #e6e3dc;
+    --canvas-bg: #faf8f3;
+    --dot: #e2ded4;
+    --text: #2c2a26;
+    --soft: #4a453d;
+    --muted: #8a857a;
+    --blue: #4a6fa5;
+    --green: #5a8a6a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--page-bg);
+    margin: 0;
+  }
+  body {
+    font-family: 'LXGW WenKai', 'KaiTi', 'STKaiti', 'PingFang SC', serif;
+    color: var(--text);
+    line-height: 1.9;
+    font-size: 15px;
+  }
+
+  /* ============================================================
+     画布外层：负责居中 + 高度自适应
+     ============================================================ */
+  .canvas-outer {
+    width: 100%;
+    padding: 40px 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: hidden;          /* 防止缩放后出现横向滚动条 */
+  }
+
+  /* ============================================================
+     画布：固定 1100px，用 transform 整体缩放
+     ============================================================ */
+  .canvas {
+    position: relative;
+    width: 1100px;                 /* 【固定宽度，不要改】 */
+    min-height: 6400px;            /* 【总高度，最后调】 */
+    flex-shrink: 0;                /* 不允许被压缩 */
+    background-color: var(--canvas-bg);
+    background-image: radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px);
+    background-size: 22px 22px;
+    border-radius: 4px;
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.04),
+      0 8px 32px rgba(0,0,0,0.08);
+    transform-origin: top center;  /* 从顶部中心缩放 */
+  }
+
+  /* ============================================================
+     卡片：透明、无边框、自由定位
+     left / width 用百分比，top 用像素
+     ============================================================ */
+  .card {
+    position: absolute;
+  }
+  .card h1 { font-size: 26px; font-weight: 600; letter-spacing: .5px; }
+  .card h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; letter-spacing: .5px; }
+  .card p { margin-bottom: 8px; color: var(--soft); }
+  .card p:last-child { margin-bottom: 0; }
+  .card ul { padding-left: 20px; margin: 8px 0; }
+  .card li { margin-bottom: 4px; color: var(--soft); }
+  .card img.card-img { max-width: 100%; display: block; margin: 10px 0; border-radius: 4px; }
+
+  .label {
+    display: inline-block;
+    font-size: 12.5px;
+    padding: 1px 10px;
+    border-radius: 4px;
+    background: rgba(74, 111, 165, 0.10);
+    color: var(--blue);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .label.green { background: rgba(90, 138, 106, 0.12); color: var(--green); }
+
+  .decision {
+    border-left: 2px solid var(--blue);
+    padding-left: 12px;
+    margin: 10px 0;
+  }
+  .decision .q { font-weight: 600; margin-bottom: 4px; }
+  .decision .a { color: var(--muted); }
+
+  /* ============================================================
+     贴纸：自由定位，可盖在卡片上
+     ============================================================ */
+  .doodle {
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas-outer">
+  <div class="canvas">
+
+    <div class="card" style="left: 6%; top: 100px; width: 28%;">
+      <h1>涂解</h1>
+      <p>一个谜题设计工具的诞生</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 200px; width: 68%;">
+      <h3>Why?</h3>
+      <p>本人深深沉迷于《格利米斯工匠》，在还没有玩完所有关卡时，就为关卡的有限感到无法遏制的哀伤，本着自食其力的心理，想说游戏内的关卡是有限的，如果自己打造，便是无限的，于是变兴致冲冲地开始设计这个工具。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 350px; width: 60%;">
+      <p>但被热血冲昏头脑地我忽略了俩个致命的问题</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 400px; width: 90%;">
+      <p>1、自己设计的关卡，自己知道答案所以无法游玩；</p>
+      <p>2、《格利米斯工匠》内已经内置了创意工坊地功能，而我沉迷游玩完全没有注意到，并且第一个问题已经被第二个问题解决，玩家间互相分享设计的谜题，谜题便无穷无尽了！我原本的设计就像地狱中的长柄勺一样狭隘，但考虑到这个工具很大概率只有我自己使用，只能用于设计谜题分享给我那些并不那么热衷于解密游戏，但会在我期待的眼神和热情的鼓励中赏光的朋友，我的导出设计也并非一无是处，除此之外因为我设计的时候并未体验过创意工坊的功能，所以很多设计逻辑都不同，因为躲开了官方答案所以没有被限制思考，现在我就学到了俩份设计方案了，怎么不算因祸得福，后面会做一点对比分析</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 600px; width: 60%;">
+      <h3>How?</h3>
+      <p>最先设计的自然是设计部分，我根据自己的游玩体验，将设计部分分为了0-3.5图层（网格层，地砖层、分割线层、推演层、贴纸层），并设计了可见性和洋葱皮的功能，和绘画软件类似，符合直觉。</p>
+    </div>
+
+    <img class="doodle"
+         src="assets/jian_tu.png"
+         alt=""
+         style="left: 68%; top: 580px; width: 30%; transform: rotate(-8deg);">
+
+    <div class="card" style="left: 6%; top: 800px; width: 60%;">
+      <img class="card-img" src="assets/dizhuan_ceng.png" alt="">
+    </div>
+
+    <div class="card" style="left: 70%; top: 860px; width: 10%;">
+      <p>- 网格层顾名思义就是网格，方便用户设计时参考区块等组件的位置</p>
+    </div>
+
+    <div class="card" style="left: 70%; top: 1000px; width: 10%;">
+      <p>- 地砖层：用于铺设谜题所需的地砖（也就是玩家鼠标可操作的空间，后续的分割线、推演以及贴纸都必须发生在地砖层所在）</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 1300px; width: 15%;">
+      <p>分割线层：分割线位于地砖内各个格子之间</p>
+      <p>- 普通线（图中一杠）：线两边的格子不能属于同一区块</p>
+      <p>- 等价线（图中两杠）：线两边的格子不能属于同一区块，且俩边形状必须相等（允许旋转、镜像）</p>
+      <p>- 非等价线（图中虚线）：线两边的格子不能属于同一区块，且俩边形状不能相等（包含旋转、镜像）</p>
+    </div>
+
+    <div class="card" style="left: 30%; top: 1300px; width: 60%;">
+      <img class="card-img" src="assets/fengexian_ceng.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 1800px; width: 60%;">
+      <p>规则限制（主要发生在推演层，其实分割线也是规则的一部分，但是分割线可以在以下所有类型中出现，所以下文所提的规则都是推演层的可选规则）是这类谜题的核心，在设计之初我设计成由用户从三种规则类型选择其一并填写规则内容</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 1900px; width: 20%;">
+      <img class="card-img" src="assets/xingzhuangxing_guize.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 2300px; width: 20%;">
+      <p>- 形状型：限制单区块形状, 填写N_Shape(限制形状的数量），并在网格中勾选出N_N个不相同（包括镜像旋转）联通图案作为限制形状</p>
+    </div>
+
+    <div class="card" style="left: 36%; top: 1900px; width: 20%;">
+      <img class="card-img" src="assets/shouji_guize.png" alt="">
+    </div>
+
+     <div class="card" style="left: 36%; top: 2300px; width: 20%;">
+      <p>- 收集型：限制单区块所必须包含的贴纸， 填写N_Sticker(限制贴纸的数量），并在网格中勾选出N_N个贴纸作为限制图案</p>
+    </div>
+
+    <div class="card" style="left: 66%; top: 1900px; width: 20%;">
+      <img class="card-img" src="assets/shuzi_guize.png" alt="">
+    </div>
+
+    <div class="card" style="left: 66%; top: 2300px; width: 20%;">
+      <p>- 数字型：限制单区块格子数，  填写N_Num(限制数的数量），并填写N_N个数字作为限制数</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 2500px; width: 60%;">
+      <p>后续又增加了规则组合，也就是在设计初可以选择要使用的规则数，然后选择要使用的规则，再按规则填写内容，但实际上形状型限制形状的同时就已经限制了数字，所以这个功能主要是支持收集型和其他类型组合，和为后续可能提供的其他规则类型提供更多可能</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 2650px; width: 60%;">
+      <p>存储路径更改，很有必要，因为c盘很宝贵</p>
+      <img class="card-img" src="assets/cunchulujing_genggai.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 3160px; width: 60%;">
+      <p>然后导出功能也是比较重要的，因为我的朋友们都不是学计算机的，对解密也没有很高的兴趣，所以我需要的导出功能必须足够轻量，采用的是提前编译好的播放器＋关卡数据，exe点开即玩，这里还有一个小小的取舍，一开始设计的时候是有测试模式和发布功能的，但这是思维定势，实际上作为一个本地工具，题库就是测试区域，导出才是对标正常联网产品的发布功能。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 3300px; width: 60%;">
+      <p>在做作品集的时候想到，导出实际上也可以导出为可嵌合进网页的html，于是便加入了这个功能，实际上和exe有点重叠了毕竟都是轻量导出，对玩家来说区别不大，但是这样大家就可以在作品集里体验了，我放入了俩个小关卡，来试试看吧！</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 3400px; width: 87%;">
+      <iframe src="test1/player.html"
+        style="width: 100%; height: 700px; border: 1px solid #e2ded4; border-radius: 8px;">
+      </iframe>
+    </div>
+
+    <div class="card" style="left: 6%; top: 4150px; width: 87%;">
+      <p>写好prd后让agent产出html原型图，预防表述有歧义的部分，确认agent理解无误后便可以开发了。</p>
+      <iframe src="prototype/prototype_000.html"
+          style="width: 100%; height: 900px; border: none;">
+      </iframe>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // 整体等比缩放：窗口变窄，画布跟着缩小，比例不变
+  // 不用改
+  // ============================================================
+  function fitCanvas() {
+    const outer = document.querySelector('.canvas-outer');
+    const canvas = document.querySelector('.canvas');
+    const canvasWidth = 1100;               // 和 CSS 里 .canvas 宽度一致
+    const sidePadding = 32;                 // 左右至少留白的像素
+    const available = window.innerWidth - sidePadding * 2;
+    const scale = Math.min(1, available / canvasWidth);
+
+    canvas.style.transform = 'scale(' + scale + ')';
+
+    // 按缩放后的高度撑开外层，避免页面底部留白太多或截断
+    const naturalHeight = canvas.offsetHeight;
+    const verticalPadding = 80;             // 上下各 40px
+    outer.style.height = (naturalHeight * scale + verticalPadding) + 'px';
+  }
+
+  window.addEventListener('resize', fitCanvas);
+  window.addEventListener('load', fitCanvas);
+  fitCanvas();
+</script>
+
+</body>
+</html>
