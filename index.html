@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>作品集</title>
+<title>Portfolio</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
 
@@ -49,7 +49,7 @@
   .canvas {
     position: relative;
     width: 1100px;                 /* 【固定宽度，不要改】 */
-    min-height: 6400px;            /* 【总高度，最后调】 */
+    min-height: 7300px;            /* 【总高度，最后调】 */
     flex-shrink: 0;                /* 不允许被压缩 */
     background-color: var(--canvas-bg);
     background-image: radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px);
@@ -207,9 +207,9 @@
     <div class="card" style="left: 6%; top: 3300px; width: 60%;">
       <p>在做作品集的时候想到，导出实际上也可以导出为可嵌合进网页的html，于是便加入了这个功能，实际上和exe有点重叠了毕竟都是轻量导出，对玩家来说区别不大，但是这样大家就可以在作品集里体验了，我放入了俩个小关卡，来试试看吧！</p>
     </div>
-    
+
     <div class="card" style="left: 6%; top: 3390px; width: 60%;">
-      <p>加入了手机端的适配（推荐使用电脑端游玩），电脑端左键点击是添加，右键点击是删除，将删除键独立出来方便手机端操作，类似于橡皮擦</p>
+      <p>加入了手机端的适配（推荐使用电脑端游玩），电脑端左键点击是添加，右键点击是删除，手机端将删除键独立出来类似于橡皮擦</p>
     </div>
 
     <div class="card" style="left: 6%; top: 3450px; width: 87%;">
@@ -223,6 +223,25 @@
       <iframe src="prototype/prototype_000.html"
           style="width: 100%; height: 920px; border: none;">
       </iframe>
+    </div>
+
+    <div class="card" style="left: 6%; top: 5200px; width: 60%;">
+      <p>最后是和《格利米斯工匠》的创意工坊对答案，没有想到居然有很多值得吐槽的反直觉设计，先讲一下我觉得很值得学习的地方：</p>
+      <p>1、并没有分图层，而是全部在一个图层上，通过键盘按键区分要安置的组件，感觉虽然有一个查找字典的学习过程，熟悉后还是非常方便的；</p>
+      <p>2、规则组合也比我的设计自由得多，可以随意添加，不需要选好规则个数。</p>
+      <img class="card-img" src="assets/glimmith_01.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 5800px; width: 60%;">
+      <p>然后就是我觉得毕竟反直觉的设计，首先就是地砖的铺设和删除居然都是右键，这和游戏内的设计（左键添加右键删除）完全不同，导致我刚上手的时候左键点了半天，我觉得同一个产品内，操作应该有一致性，避免这种情况。</p>
+      <p>还有就是限制形状的设计，没有连通性检测，非常古怪，这样的话很难区分是否属于同一区块，而且又存在一个形状可能是另一个形状的子集的情况，完全没法区分，添加形状设计的时候也非常反直觉，不是勾选好一个形状就保存然后刷新画布，而是勾选形状后在规则中选择添加形状，然后！！注意要手动删除画布中的形状再添加，否则下次添加时就会出现重复</p>
+      <img class="card-img" src="assets/glimmith_liantongxing.png" alt="">
+      <p>另外还有bug，进入测试模式再返回后，会把测试模式的报错带回来，需要手动解除</p>
+      <img class="card-img" src="assets/glimmith_bug.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 6950px; width: 60%;">
+      <p>最大的收获：拓宽了设计思路，可以看到官方的设计是以自由度为中心的，而我则不自觉地以“不能出bug”为中心，下意识地增加了很多限制性条件，在自由度上更为欠缺，当然bug也比官方要少（</p>
     </div>
 
   </div>
