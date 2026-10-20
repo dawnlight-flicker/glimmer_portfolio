@@ -8,6 +8,76 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
 
 <style>
+
+  /* ============================================================
+   左侧固定导航
+   ============================================================ */
+.side-nav {
+  position: fixed;
+  top: 50%;
+  left: 24px;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 14px;
+  background: rgba(250, 248, 243, 0.92);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2ded4;
+}
+
+.side-nav .nav-brand {
+  font-size: 13px;
+  color: #8a857a;
+  padding: 0 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed #e2ded4;
+  letter-spacing: 1px;
+}
+
+.side-nav a {
+  display: block;
+  padding: 7px 14px;
+  font-size: 14px;
+  color: #4a453d;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background .2s, color .2s;
+  white-space: nowrap;
+}
+
+.side-nav a:hover {
+  background: rgba(74, 111, 165, 0.08);
+  color: #4a6fa5;
+}
+
+.side-nav a.active {
+  background: rgba(74, 111, 165, 0.12);
+  color: #4a6fa5;
+  font-weight: 600;
+}
+
+/* 窄屏隐藏导航，避免挡画布 */
+@media (max-width: 900px) {
+  .side-nav { display: none; }
+}
+
+  .canvas-outer {
+  width: 100%;
+  padding: 40px 0 40px 200px;   /* 左边留出导航宽度 */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .canvas-outer { padding-left: 0; }
+}
+
   :root {
     --page-bg: #e6e3dc;
     --canvas-bg: #faf8f3;
@@ -49,7 +119,7 @@
   .canvas {
     position: relative;
     width: 1100px;                 /* 【固定宽度，不要改】 */
-    min-height: 7300px;            /* 【总高度，最后调】 */
+    min-height: 8000px;            /* 【总高度，最后调】 */
     flex-shrink: 0;                /* 不允许被压缩 */
     background-color: var(--canvas-bg);
     background-image: radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px);
@@ -107,6 +177,18 @@
 </style>
 </head>
 <body>
+
+<!-- ============================================================
+     左侧导航栏
+     每个 a 的 data-target 对应画布里的 top 值（像素）
+     改数字就能跳到不同位置
+     ============================================================ -->
+<nav class="side-nav">
+  <div class="nav-brand">作品集</div>
+  <a href="#" data-target="100">涂解</a>
+  <a href="#" data-target="5900">拾光签</a>
+  <a href="#" data-target="99999">联系方式</a>
+</nav>
 
 <div class="canvas-outer">
   <div class="canvas">
@@ -219,7 +301,7 @@
     </div>
 
     <div class="card" style="left: 6%; top: 4200px; width: 87%;">
-      <p>写好prd后让agent产出html原型图，预防表述有歧义的部分，一旦agent有理解错误，便可以在这一步进行修正，确认agent理解无误后便可以开发了（为了避免作品集过于冗长，更细节的设计可以参考下述原型图）。</p>
+      <p>写好prd后让agent产出html原型图，预防表述有歧义的部分，确认agent理解无误后便可以开发了。</p>
       <iframe src="prototype/prototype_000.html"
           style="width: 100%; height: 920px; border: none;">
       </iframe>
@@ -240,13 +322,116 @@
     </div>
 
     <div class="card" style="left: 6%; top: 5750px; width: 60%;">
-      <p>最大的收获：拓宽了设计思路，可以看到官方的设计是以自由度为中心的，而我则不自觉地以“不能出bug”为中心，下意识地增加了很多限制性条件，在自由度上更为欠缺。</p>
+      <p>最大的收获：拓宽了设计思路，可以看到官方的设计是以自由度为中心的，而我则不自觉地以“不能出bug”为中心，下意识地增加了很多限制性条件，在自由度上更为欠缺</p>
     </div>
+
+    <div class="card" style="left: 6%; top: 5900px; width: 28%;">
+      <h1>拾光签</h1>
+      <p>一个待办日历匣的诞生</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 6000px; width: 60%;">
+      <p>讲拾光签的话呢，就要简单讲一下他的前身：duedate（ddl提醒日历），在小组作业中，和组员共同选择了*通知提醒助手*作为课设项目，结合经验考虑到ddl是不少学生对于通知最关心的部分，且日历的形式简单易展示，且收集来的通知需要一个展示看板，于是设计了日历看板的形式</p>
+      <img class="card-img" src="assets/duedate_jietu.png" alt="">
+      <p>duedate实机截图</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 6600px; width: 60%;">
+      <p>在课设完成之后，我依旧很喜欢这个设计，正好我朋友经常会在微信上开视频一起学习，我想能不能做成一个好友预约系统，可以在日历上交互好友的空闲时间进行预约呢，后续我意识到这样不利于好友之间的隐私保护，便考虑在学习小组的公屏上发起预约，但是这样就和微信群一样了，考虑在小组中加入宠物培养，可以按多人学习时长挣猫粮之类的，但是我的美术不支持，所以都砍掉了，转换思路把拾光签改成单人使用的提醒工具。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 6780px; width: 60%;">
+      <p>设计了周历和月历的切换，周历类似于课表，方便查看每天的日程，月历方便展示当月的日程数量，点击后才可以查看每日日程（周历参考课表设计也留下了bug，后续测试过程中发现六点前的事件不会现实在周历中，检查显示代码无误，最终发现由于是参考课表设计，从一开始便没有显示六点前的内容，于是便把周历的时间改成第0天零点到第1天零点。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 6940px; width: 60%;">
+      <p>出于减熵的心态，设计了待办和杂物堆双层缓冲，从通知到待办到实际加入日程做多层筛选，避免一开屏就被通知淹没，希望可以通过缓冲隔离设计保证用户对日程的掌控感。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 7030px; width: 60%;">
+      <p>有些待办是长期事项，加入一次日程后，后续还可能需要，所以便设置了长期待办，锁定后不会在加入日程后自动删除，而是保留在待办中。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 7120px; width: 60%;">
+      <p>由于我本人经常面对多任务并行，截至日期和优先级差不多，在空闲时间难以抉择的问题，便在待办中设置了签筒，可以通过抽签减少决策时间</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 7200px; width: 87%;">
+      <p>实机演示：</p>
+      <iframe src="//player.bilibili.com/player.html?isOutside=true&aid=117296513222884&bvid=BV1hGe46UE7H&cid=42024042939&p=1"
+        style="width: 100%; height: 500px; border: none;"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <div class="card" style="left: 6%; top: 7800px; width: 60%;">
+      <h1>联系方式</h1>
+      <p>电话：13720867131</p>
+      <p>邮箱：lishuqi_05@163.com</p>
+      <p>微信：Null_3_Zn_and_H</p>
+    </div>
+
 
   </div>
 </div>
 
 <script>
+
+  /* ============================================================
+   导航跳转 + 当前章节高亮
+   ============================================================ */
+const sideNav = document.querySelector('.side-nav');
+const navLinks = sideNav.querySelectorAll('a[data-target]');
+
+// 点击跳转
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const targetTop = parseInt(link.dataset.target);
+    const canvas = document.querySelector('.canvas');
+
+    // 计算画布在文档里的实际顶部位置
+    const canvasRect = canvas.getBoundingClientRect();
+    const canvasTopInDoc = canvasRect.top + window.scrollY;
+
+    // 当前缩放比例
+    const scaleMatch = canvas.style.transform.match(/scale\(([\d.]+)\)/);
+    const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+
+    // 实际滚动目标 = 画布顶部 + 目标 top * 缩放
+    const targetY = canvasTopInDoc + targetTop * scale;
+
+    window.scrollTo({ top: targetY, behavior: 'smooth' });
+  });
+});
+
+// 滚动时高亮当前章节
+function updateActiveNav() {
+  const canvas = document.querySelector('.canvas');
+  const canvasRect = canvas.getBoundingClientRect();
+  const canvasTopInDoc = canvasRect.top + window.scrollY;
+
+  const scaleMatch = canvas.style.transform.match(/scale\(([\d.]+)\)/);
+  const scale = scaleMatch ? parseFloat(scaleMatch[1]) : 1;
+
+  // 当前视口顶部对应的画布内 top 值
+  const scrollInCanvas = (window.scrollY - canvasTopInDoc) / scale;
+
+  let activeIndex = 0;
+  navLinks.forEach((link, i) => {
+    const target = parseInt(link.dataset.target);
+    if (scrollInCanvas >= target - 100) {
+      activeIndex = i;
+    }
+  });
+
+  navLinks.forEach(l => l.classList.remove('active'));
+  navLinks[activeIndex].classList.add('active');
+}
+
+window.addEventListener('scroll', updateActiveNav);
+window.addEventListener('resize', updateActiveNav);
+updateActiveNav();
   // ============================================================
   // 整体等比缩放：窗口变窄，画布跟着缩小，比例不变
   // 不用改
