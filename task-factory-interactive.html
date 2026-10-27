@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人任务与档案工作流系统 · 可交互原型</title>
+<style>
+  :root{
+    --bg:#e9e9e9; --panel:#fff; --soft:#f4f4f4; --line:#bdbdbd;
+    --ink:#111; --d:#444; --m:#777; --l:#999;
+    --danger:#b3261e; --ok:#1f6f43;
+    --mono:"Cascadia Mono",Consolas,ui-monospace,monospace;
+    --sans:"Segoe UI","Microsoft YaHei",Arial,sans-serif;
+  }
+  [data-theme="dark"]{
+    --bg:#141414; --panel:#1d1d1d; --soft:#262626; --line:#3c3c3c;
+    --ink:#ededed; --d:#c2c2c2; --m:#909090; --l:#666;
+    --danger:#ff7b72; --ok:#6fd39a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  button,input,textarea,select{font-family:inherit}
+  .app{display:flex;min-height:100vh}
+  .side{width:196px;flex:none;background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;position:sticky;top:0;height:100vh}
+  .brand{font-weight:700;letter-spacing:.4px;margin-bottom:20px;font-size:14px;line-height:1.4}
+  .brand small{display:block;font:10px var(--mono);color:var(--m);font-weight:400;margin-top:4px}
+  .nav button{display:block;width:100%;text-align:left;padding:9px 10px;margin-bottom:4px;border:1px solid transparent;background:none;color:var(--d);cursor:pointer;font-size:13px}
+  .nav button:hover{background:var(--soft)}
+  .nav button.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+  .nav .sub{font:10px var(--mono);color:var(--l);margin:14px 0 6px;letter-spacing:.6px}
+  .nav .mini{font-size:12px;padding:6px 10px}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .top{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:10}
+  .top h1{font-size:16px;margin:0;white-space:nowrap}
+  .flow{font:11px var(--mono);color:var(--m)}
+  .grow{flex:1}
+  .content{padding:18px;max-width:1180px;width:100%}
+  .muted{color:var(--m);font-size:12px}
+  .btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 12px;cursor:pointer;font-size:13px;border-radius:2px}
+  .btn:hover{background:var(--soft)}
+  .btn.primary{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+  .btn.primary:hover{opacity:.88}
+  .btn.danger{color:var(--danger);border-color:var(--danger);background:transparent}
+  .btn.ghost{background:transparent}
+  .btn.sm{padding:3px 8px;font-size:12px}
+  .btn[disabled]{opacity:.42;cursor:not-allowed}
+  .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .input,textarea.input{width:100%;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 10px;font-size:13px;border-radius:2px}
+  .input:focus,textarea.input:focus{outline:2px solid var(--ink);outline-offset:-2px}
+  .field-error{color:var(--danger);font-size:12px;margin-top:4px;min-height:16px}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:12px;padding:2px 9px;font-size:12px;background:var(--panel);cursor:pointer;user-select:none}
+  .chip.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+  .chip.ro{cursor:default}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.25)}
+  .tagbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:0 0 12px;border-bottom:1px dashed var(--line);margin-bottom:14px}
+  .masonry{columns:2;column-gap:10px}
+  @media (max-width:900px){.masonry{columns:1}}
+  .tile{border:1px solid var(--line);background:var(--panel);padding:10px 12px;margin:0 0 10px;break-inside:avoid;cursor:pointer;min-height:42px}
+  .tile:hover{border-color:var(--ink)}
+  .tile p{margin:0;word-break:break-word;font-size:13px}
+  .floating{position:fixed;right:28px;bottom:28px;z-index:12}
+  .empty{border:1px dashed var(--line);background:var(--panel);padding:44px 20px;text-align:center;color:var(--m);font-size:13px}
+  .empty .ph{width:70px;height:44px;border:1px dashed var(--l);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font:10px var(--mono);color:var(--l);background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 3px,var(--soft) 3px,var(--soft) 6px)}
+  .taskrow{display:grid;grid-template-columns:1fr 160px 76px;gap:14px;align-items:center;border:1px solid var(--line);background:var(--panel);padding:10px 12px;margin-bottom:8px;cursor:pointer}
+  .taskrow:hover{border-color:var(--ink)}
+  .taskrow .nm{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar{height:6px;background:var(--soft);border:1px solid var(--line);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--ink)}
+  .pct{font-size:12px;color:var(--m);text-align:right;white-space:nowrap}
+  .panel{border:1px solid var(--line);background:var(--panel);padding:14px;margin-bottom:14px}
+  .panel h2{font-size:14px;margin:0 0 10px}
+  .step{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+  .step .ct{flex:1;min-width:0;word-break:break-word}
+  .step.cut .ct{text-decoration:line-through;color:var(--danger)}
+  .step.done .ct{color:var(--m)}
+  .children{padding-left:24px;border-left:1px dashed var(--line);margin-left:8px}
+  .cb{width:16px;height:16px;border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:10px;background:var(--panel);margin-top:2px}
+  .cb.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+  .cb.cut{color:var(--danger);border-color:var(--danger);text-decoration:line-through}
+  .step .act{opacity:0;font-size:11px;color:var(--m);background:none;border:0;cursor:pointer;padding:0 4px}
+  .step:hover .act{opacity:1}
+  .taglist{display:flex;gap:6px;flex-wrap:wrap}
+  .kv{display:grid;grid-template-columns:96px 1fr;gap:8px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .kv:last-child{border-bottom:0}
+  .kv b{font-weight:600;color:var(--m);font-size:12px}
+  .split{display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:start}
+  @media (max-width:900px){.split{grid-template-columns:1fr}}
+  .tree{border:1px solid var(--line);background:var(--panel);padding:8px}
+  .tree .node{padding:6px 8px;cursor:pointer;font-size:13px;display:flex;gap:6px;align-items:center}
+  .tree .node:hover{background:var(--soft)}
+  .tree .node.on{background:var(--ink);color:var(--panel)}
+  .tree .kids{padding-left:14px}
+  .card{border:1px solid var(--line);background:var(--panel);padding:10px 12px;margin-bottom:8px;cursor:pointer}
+  .card:hover{border-color:var(--ink)}
+  .card .t{font-weight:600}
+  .card .s{font-size:12px;color:var(--m);margin-top:2px}
+  .file{display:grid;grid-template-columns:1fr 140px;gap:10px;align-items:center;border:1px solid var(--line);background:var(--panel);padding:8px 12px;margin-bottom:6px;font-size:13px;cursor:pointer}
+  .file:hover{border-color:var(--ink)}
+  .file .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .badge{font:10px var(--mono);border:1px solid var(--line);padding:1px 6px;color:var(--m);white-space:nowrap}
+  .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.38);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60}
+  .modal{background:var(--panel);border:1px solid var(--ink);width:min(540px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+  .modal.wide{width:min(760px,94vw)}
+  .modal header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px}
+  .modal header .x{margin-left:auto;background:none;border:0;font-size:18px;line-height:1;cursor:pointer;color:var(--m)}
+  .modal .mbody{padding:14px;overflow:auto}
+  .modal footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
+  .mtext{font-size:13px;color:var(--d);white-space:pre-wrap}
+  #toasts{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:95;display:flex;flex-direction:column;gap:6px;align-items:center;pointer-events:none}
+  .toast{background:var(--ink);color:var(--panel);padding:6px 14px;font-size:12px;animation:tin .18s ease-out}
+  @keyframes tin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .menu{position:fixed;z-index:85;background:var(--panel);border:1px solid var(--ink);min-width:150px;padding:4px;box-shadow:0 6px 22px rgba(0,0,0,.18)}
+  .menu button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:7px 10px;cursor:pointer;font-size:13px}
+  .menu button:hover{background:var(--soft)}
+  .menu button.danger{color:var(--danger)}
+  .menu button[disabled]{opacity:.4;cursor:not-allowed}
+  .menu hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+  .sort{position:fixed;inset:0;background:var(--bg);z-index:40;display:flex;flex-direction:column;padding:16px}
+  .sort .head{display:flex;align-items:center;gap:12px}
+  .sort .head .grow{flex:1}
+  .sort .zone{flex:1;margin:10px 0;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--m);font:12px var(--mono);cursor:pointer;background:var(--panel)}
+  .sort .zone.up{border-bottom-style:solid}
+  .sort .stage{height:220px;display:flex;align-items:center;justify-content:center;position:relative}
+  .sort .stagewrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .sort .cardrow{display:flex;align-items:center;gap:14px}
+  .sort .counter{font:12px var(--mono);color:var(--m)}
+  .sortcard{border:1px solid var(--ink);background:var(--panel);padding:22px;width:min(420px,80vw);font-size:15px;cursor:grab;touch-action:none;user-select:none;box-shadow:0 8px 26px rgba(0,0,0,.12);position:relative;z-index:2}
+  .sortcard.drag{cursor:grabbing}
+  .sort .foot{display:flex;align-items:center;padding-top:6px}
+  .progress{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:96;display:flex;align-items:center;justify-content:center}
+  .progress .box{background:var(--panel);border:1px solid var(--ink);padding:22px 26px;width:min(420px,90vw)}
+  .progress .bar{height:8px;margin-top:12px}
+  .editor{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:16px;align-items:start}
+  .editor.collapsed{display:block;max-width:840px;margin:0 auto;position:relative}
+  .editor.collapsed .todoTab{position:absolute;right:-42px;left:auto;top:0;width:30px;min-height:118px;border:1px solid var(--line);background:var(--panel);color:var(--m);cursor:pointer;font-size:12px;letter-spacing:3px;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0;border-radius:2px}
+  .editor.collapsed .todoTab:hover{border-color:var(--ink);color:var(--ink)}
+  @media (max-width:1100px){.editor.collapsed .todoTab{position:static;width:auto;min-height:0;letter-spacing:0;writing-mode:horizontal-tb;padding:6px 10px;margin-top:10px;display:inline-flex}}
+  @media (max-width:900px){.editor{grid-template-columns:1fr}}
+  .todo{border:1px solid var(--line);background:var(--panel);padding:10px}
+  .todo h3{font-size:12px;color:var(--m);margin:0 0 8px;font-weight:600;letter-spacing:.4px}
+  .todo .item{border:1px solid var(--line);padding:7px 9px;margin-bottom:6px;font-size:12px;cursor:pointer}
+  .todo .item:hover{border-color:var(--ink)}
+  .todo .item.on{border-color:var(--ink);background:var(--soft)}
+  .sep{height:1px;background:var(--line);margin:12px 0}
+  .hintbox{font-size:12px;color:var(--m);border-left:3px solid var(--line);padding-left:10px;margin:10px 0}
+  .errpage{max-width:560px;margin:8vh auto;text-align:center}
+  .errpage .ph{width:120px;height:70px;border:1px dashed var(--l);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font:11px var(--mono);color:var(--l)}
+  .settingrow{display:grid;grid-template-columns:160px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .settingrow:last-child{border-bottom:0}
+  .sw{display:inline-flex;gap:8px;flex-wrap:wrap}
+  .sw button{width:26px;height:26px;border:1px solid var(--line);cursor:pointer;padding:0}
+  .sw button.on{outline:2px solid var(--ink);outline-offset:1px}
+  .erow{display:flex;gap:8px;align-items:flex-start;padding:3px 0;border-top:2px solid transparent}
+  .erow.ins{border-top-color:var(--ink)}
+  .erow>.handle{cursor:grab;color:var(--l);font-size:12px;user-select:none;padding-top:8px;line-height:1;letter-spacing:-2px}
+  .erow>textarea{flex:1;min-height:34px;resize:vertical}
+  .esteps .kids{padding-left:22px;border-left:1px dashed var(--line);margin-left:12px}
+  .recrow{display:grid;grid-template-columns:26px 1fr 84px 150px;gap:10px;align-items:center;border:1px solid var(--line);background:var(--panel);padding:9px 12px;margin-bottom:6px}
+  .recrow:hover{border-color:var(--ink)}
+  .codepath{font:12px var(--mono);color:var(--d);word-break:break-all}
+  .libhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .tagpick{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .shake{animation:shake .28s ease-in-out 2}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts"></div>
+<div id="modalRoot"></div>
+<div id="menuRoot"></div>
+<script>
+/* ================= 数据层 ================= */
+const KEY = 'tf-interactive-v2';
+const now = () => new Date().toISOString();
+const uid = p => p + Math.random().toString(36).slice(2, 8);
+
+let D = loadData();
+
+function seed(){
+  const t = now();
+  return {
+    seq: 100,
+    theme: 'light',
+    storagePath: 'D:/TaskFactoryData',
+    dbOk: true,
+    tags: [
+      { id: 'g1', name: '工作', color: '#111111' },
+      { id: 'g2', name: '生活', color: '#666666' }
+    ],
+    folders: [
+      { id: 'f1', name: '2026 Q4', parentId: null, type: 'archive' },
+      { id: 'f2', name: '阅读', parentId: 'f1', type: 'archive' },
+      { id: 'f3', name: '扫描件', parentId: null, type: 'material' }
+    ],
+    tasks: [
+      { id: 't1', title: '整理季度汇报', reference: '季度数据在共享盘', notes: '周三前完成', status: 'active', folderId: null, originTodo: 0, tagIds: ['g1'], createdAt: t, updatedAt: t },
+      { id: 't2', title: '对比三款记账工具', reference: '', notes: '', status: 'active', folderId: null, originTodo: 1, tagIds: [], createdAt: t, updatedAt: t },
+      { id: 't3', title: '读完《深度工作》', reference: '', notes: '', status: 'archived', folderId: 'f2', originTodo: 0, tagIds: ['g1'], createdAt: t, updatedAt: t },
+      { id: 't4', title: '旧任务：整理旧照片', reference: '', notes: '', status: 'trashed', folderId: null, originTodo: 0, tagIds: ['g2'], createdAt: t, updatedAt: t, deletedAt: t, deletedFromFolderId: null }
+    ],
+    steps: [
+      { id: 's1', taskId: 't1', parentId: null, content: '收集季度数据', status: 'completed', sort: 0 },
+      { id: 's2', taskId: 't1', parentId: null, content: '撰写汇报提纲', status: 'pending', sort: 1 },
+      { id: 's3', taskId: 't1', parentId: 's2', content: '汇总图表', status: 'pending', sort: 0 },
+      { id: 's4', taskId: 't3', parentId: null, content: '读完正文', status: 'completed', sort: 0 },
+      { id: 's5', taskId: 't3', parentId: null, content: '整理摘录', status: 'cut', sort: 1 }
+    ],
+    distractions: [
+      { id: 'd1', content: '给猫预约洗澡', status: 'pile', createdAt: '2026-10-27T01:00:00.000Z', deletedAt: null },
+      { id: 'd2', content: '预约周三牙科复诊', status: 'pile', createdAt: '2026-10-27T02:00:00.000Z', deletedAt: null },
+      { id: 'd3', content: '整理桌面文件', status: 'pile', createdAt: '2026-10-27T03:00:00.000Z', deletedAt: null },
+      { id: 'd4', content: '丢掉过期的优惠券', status: 'trashed', createdAt: '2026-10-26T03:00:00.000Z', deletedAt: t }
+    ],
+    files: [
+      { id: 'm1', folderId: 'f3', originalName: '身份证扫描件.pdf', size: 240000, createdAt: t, deletedAt: null, deletedFromFolderId: null },
+      { id: 'm2', folderId: 'f3', originalName: '合同-旧版.pdf', size: 1024000, createdAt: t, deletedAt: t, deletedFromFolderId: 'f3' }
+    ],
+    filterTagIds: []
+  };
+}
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return seed();
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(D)); }catch(e){}
+}
+function resetDemo(){
+  D = seed(); save();
+}
+
+/* ================= 通用工具 ================= */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = iso => iso ? new Date(iso).toLocaleString('zh-CN', { hour12: false }) : '';
+const fmtDay = iso => iso ? new Date(iso).toLocaleDateString('zh-CN') : '';
+
+function toast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+/* ================= 弹窗栈 ================= */
+const modalStack = [];
+function openModal(opt){
+  const mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.innerHTML = `
+    <div class="modal ${opt.wide ? 'wide' : ''}" role="dialog" aria-modal="true">
+      <header><span>${esc(opt.title || '')}</span>${opt.dismissible === false ? '' : '<button class="x" data-x aria-label="关闭">×</button>'}</header>
+      <div class="mbody">${opt.body || ''}</div>
+      <footer>${opt.footer || ''}</footer>
+    </div>`;
+  $('#modalRoot').appendChild(mask);
+  const rec = { mask, dismissible: opt.dismissible !== false, onClose: opt.onClose };
+  modalStack.push(rec);
+  if(rec.dismissible){
+    mask.addEventListener('mousedown', e => { if(e.target === mask) closeModal(); });
+    mask.querySelector('[data-x]').addEventListener('click', () => closeModal());
+  }
+  if(opt.after) opt.after(mask);
+  return mask;
+}
+function closeModal(){
+  const rec = modalStack.pop();
+  if(!rec) return;
+  rec.mask.remove();
+  if(rec.onClose) rec.onClose();
+}
+function closeAllModals(){ while(modalStack.length) closeModal(); }
+
+function confirmDlg(o){
+  return new Promise(resolve => {
+    let done = false;
+    const mask = openModal({
+      title: o.title || '确认',
+      body: `<div class="mtext">${esc(o.message || '')}</div>`,
+      footer: `<button class="btn ghost" data-c>${esc(o.cancel || '取消')}</button><button class="btn ${o.danger === false ? 'primary' : 'danger'}" data-k>${esc(o.ok || '确认')}</button>`,
+      onClose: () => { if(!done) resolve(false); }
+    });
+    mask.querySelector('[data-c]').onclick = () => { done = true; closeModal(); resolve(false); };
+    mask.querySelector('[data-k]').onclick = () => { done = true; closeModal(); resolve(true); };
+  });
+}
+
+function promptDlg(o){
+  return new Promise(resolve => {
+    let done = false;
+    const mask = openModal({
+      title: o.title || '请输入',
+      body: `<label class="muted">${esc(o.label || '')}</label>
+             <input class="input" id="pIn" maxlength="${o.max || 20}" value="${esc(o.value || '')}" placeholder="${esc(o.placeholder || '')}" style="margin-top:6px">
+             <div class="field-error" id="pErr"></div>`,
+      footer: `<button class="btn ghost" data-c>取消</button><button class="btn primary" data-k>${esc(o.ok || '确定')}</button>`,
+      onClose: () => { if(!done) resolve(null); }
+    });
+    const input = mask.querySelector('#pIn');
+    const err = mask.querySelector('#pErr');
+    setTimeout(() => { input.focus(); input.select(); }, 30);
+    const submit = () => {
+      const v = input.value.trim();
+      const msg = o.validate ? o.validate(v) : (v ? '' : '不能为空');
+      if(msg){ err.textContent = msg; return; }
+      done = true; closeModal(); resolve(v);
+    };
+    mask.querySelector('[data-k]').onclick = submit;
+    mask.querySelector('[data-c]').onclick = () => { done = true; closeModal(); resolve(null); };
+    input.addEventListener('keydown', e => {
+      if(e.key === 'Enter'){ e.preventDefault(); submit(); }
+    });
+  });
+}
+
+/* ================= 右键菜单 ================= */
+function closeMenu(){ $('#menuRoot').innerHTML = ''; }
+function showMenu(x, y, items){
+  const box = document.createElement('div');
+  box.className = 'menu';
+  const isSep = it => it === '-' || (it && it.label === '-');
+  box.innerHTML = items.map((it, i) => isSep(it) ? '<hr>' :
+    `<button data-i="${i}" ${it.disabled ? 'disabled' : ''} class="${it.danger ? 'danger' : ''}">${esc(it.label)}</button>`).join('');
+  $('#menuRoot').appendChild(box);
+  const w = box.offsetWidth, h = box.offsetHeight;
+  box.style.left = Math.min(x, innerWidth - w - 8) + 'px';
+  box.style.top = Math.min(y, innerHeight - h - 8) + 'px';
+  items.forEach((it, i) => {
+    if(isSep(it) || it.disabled) return;
+    const b = box.querySelector(`[data-i="${i}"]`);
+    b.onclick = () => { closeMenu(); it.onClick(); };
+  });
+  setTimeout(() => {
+    const off = e => { if(!box.contains(e.target)){ closeMenu(); document.removeEventListener('mousedown', off); } };
+    document.addEventListener('mousedown', off);
+  }, 0);
+}
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){
+    if($('#menuRoot').innerHTML){ closeMenu(); return; }
+    if(modalStack.length && modalStack[modalStack.length - 1].dismissible) closeModal();
+  }
+});
+
+/* ================= 领域查询 ================= */
+function findTask(id){ return D.tasks.find(t => t.id === id); }
+const findStep = id => D.steps.find(s => s.id === id);
+const findFolder = id => D.folders.find(f => f.id === id);
+const findTag = id => D.tags.find(t => t.id === id);
+const stepsOf = taskId => D.steps.filter(s => s.taskId === taskId);
+const childrenOf = (taskId, parentId) => stepsOf(taskId).filter(s => s.parentId === parentId).sort((a, b) => a.sort - b.sort);
+const topSteps = taskId => childrenOf(taskId, null);
+const tagsOf = task => (task.tagIds || []).map(findTag).filter(Boolean);
+
+function progress(task){
+  const list = stepsOf(task.id);
+  if(!list.length) return { pct: 0, total: 0 };
+  const done = list.filter(s => s.status === 'completed' || s.status === 'cut').length;
+  return { pct: Math.round(done / list.length * 100), total: list.length };
+}
+function canArchive(task){
+  const tops = topSteps(task.id);
+  return tops.length > 0 && tops.every(s => s.status === 'completed' || s.status === 'cut');
+}
+function folderExists(id){
+  if(id === 'ROOT' || id === null) return true;
+  return !!findFolder(id);
+}
+function folderKids(type, parentId){ return D.folders.filter(f => f.type === type && (f.parentId || null) === parentId); }
+function folderName(id){
+  const f = findFolder(id);
+  return f ? f.name : '根目录';
+}
+function hasFolderChildren(id){
+  return D.folders.some(f => f.parentId === id) || D.files.some(f => f.folderId === id && !f.deletedAt);
+}
+
+/* ================= 步骤状态机（唯一入口） ================= */
+function applyStatus(taskId, stepId, status){
+  const node = findStep(stepId);
+  if(!node) return;
+  const walk = n => {
+    n.status = status;
+    childrenOf(taskId, n.id).forEach(walk);
+  };
+  walk(node);
+  let pid = node.parentId;
+  while(pid){
+    const parent = findStep(pid);
+    if(!parent) break;
+    const kids = childrenOf(taskId, parent.id);
+    if(kids.length){
+      const allHandled = kids.every(k => k.status === 'completed' || k.status === 'cut');
+      parent.status = allHandled ? 'completed' : 'pending';
+    }
+    pid = parent.parentId;
+  }
+  const t = findTask(taskId); if(t) t.updatedAt = now();
+  save();
+}
+
+/* ================= 视图状态 ================= */
+let view = 'distractions';
+let detailId = null;
+let editTaskId = null;
+let editIsNew = false;
+let editDirty = false;
+let editTimer = null;
+let editSavedAt = 0;
+let editInlineErrors = { title: '', tags: '' };
+let editTodoSource = null;
+let libTab = 'archive';
+let arcFolder = 'ROOT';
+let matFolder = 'ROOT';
+let hideCut = false;
+let filterTags = (D.filterTagIds || []).slice();
+let selRecycle = new Set();
+let sortQueue = [];
+let sortIndex = 0;
+let sortTotal = 0;
+let sortBusy = false;
+let dbError = false;
+
+/* ================= 补充视图状态 ================= */
+let filterAll = true;
+let editDraft = null;
+let editSteps = [];
+let editTodoAsked = false;
+let todoExpanded = true;
+let detailInfoOpen = true;
+let tagSearch = '';
+let focusAfter = null;
+let ntColor = '#ffffff';
+let pickState = null;
+let storageFailPath = '';
+let rtPicked = new Set();
+let rtRefresh = null;
+
+/* ================= 小工具 ================= */
+const todoItems = () => D.tasks
+  .filter(t => t.status === 'active' && t.originTodo === 1)
+  .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+
+const pileItems = () => D.distractions
+  .filter(d => d.status === 'pile')
+  .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+function taskRowHTML(t){
+  const p = progress(t);
+  return `<div class="taskrow" onclick="openDetail('${t.id}')" oncontextmenu="taskMenu(event,'${t.id}')">
+    <div class="nm">${esc(t.title)}</div>
+    <div class="bar"><i style="width:${p.pct}%"></i></div>
+    <div class="pct">${p.total ? p.pct + '%' : '暂无步骤'}</div>
+  </div>`;
+}
+
+function tagChip(g, on, click, ctx){
+  return `<span class="chip ${on ? 'on' : ''}"${click ? ` onclick="${click}"` : ''}${ctx ? ` oncontextmenu="${ctx}"` : ''}><i class="dot" style="background:${g.color || '#999'}"></i>${esc(g.name)}</span>`;
+}
+
+function refreshDirtyHint(){
+  const el = $('#dirtyHint');
+  if(el) el.textContent = editDirty ? '未保存的更改' : '已保存';
+}
+function updateEditorErrors(){
+  const a = $('#errTitle'), b = $('#errTags');
+  if(a) a.textContent = editInlineErrors.title || '';
+  if(b) b.textContent = editInlineErrors.tags || '';
+}
+
+/* ================= 杂物堆 ================= */
+function pageDistractions(){
+  const list = pileItems();
+  const inner = `
+    <div class="row" style="margin-bottom:14px;flex-wrap:nowrap">
+      <input id="newDist" class="input" placeholder="丢一句话进来…" onkeydown="if(event.key==='Enter'){event.preventDefault();addDistraction()}">
+      <button class="btn primary" onclick="addDistraction()">添加</button>
+      <button class="btn" onclick="startSorting()" ${list.length ? '' : 'disabled'}>分拣</button>
+    </div>
+    ${list.length
+      ? `<div class="masonry">${list.map(d => `<div class="tile" onclick="dMenu(event,'${d.id}')" oncontextmenu="dMenu(event,'${d.id}')"><p>${esc(d.content)}</p></div>`).join('')}</div>`
+      : `<div class="empty"><div class="ph">EMPTY</div>还没有杂物，先丢一句话进来。</div>`}
+    <p class="muted" style="margin-top:16px">左键点击卡片可选择查看 / 编辑，右键点击可选择删除。</p>`;
+  return { title: '杂物堆', flow: '⑥ 收件 · 入口', actions: '', inner, nav: 'distractions' };
+}
+
+function addDistraction(){
+  const inp = $('#newDist');
+  if(!inp) return;
+  const v = inp.value.trim();
+  if(!v){
+    inp.classList.remove('shake');
+    void inp.offsetWidth;
+    inp.classList.add('shake');
+    setTimeout(() => inp.classList.remove('shake'), 700);
+    inp.focus();
+    return;
+  }
+  D.distractions.push({ id: uid('d'), content: v, status: 'pile', createdAt: now(), deletedAt: null });
+  save();
+  inp.value = '';
+  render();
+  const again = $('#newDist');
+  if(again) again.focus();
+}
+
+function dMenu(e, id){
+  e.preventDefault();
+  const d = D.distractions.find(x => x.id === id);
+  if(!d) return;
+  showMenu(e.clientX, e.clientY, [
+    { label: '查看', onClick: () => dView(id) },
+    { label: '编辑', onClick: () => dEdit(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => dDelete(id) }
+  ]);
+}
+
+function dView(id){
+  const d = D.distractions.find(x => x.id === id);
+  if(!d) return;
+  openModal({
+    title: '查看杂物',
+    body: `<div class="mtext">${esc(d.content)}</div>`,
+    footer: `<button class="btn primary" onclick="closeModal()">关闭</button>`
+  });
+}
+
+function dEdit(id){
+  const d = D.distractions.find(x => x.id === id);
+  if(!d) return;
+  const mask = openModal({
+    title: '编辑杂物',
+    body: `<textarea class="input" id="dTxt" rows="4">${esc(d.content)}</textarea><div class="field-error" id="dErr"></div>`,
+    footer: `<button class="btn ghost" data-c>取消</button><button class="btn primary" data-k>保存</button>`
+  });
+  const ta = mask.querySelector('#dTxt');
+  mask.querySelector('[data-c]').onclick = () => closeModal();
+  mask.querySelector('[data-k]').onclick = () => {
+    const v = ta.value.trim();
+    if(!v){ mask.querySelector('#dErr').textContent = '内容不能为空'; return; }
+    d.content = v;
+    save(); closeModal(); render();
+  };
+  setTimeout(() => ta.focus(), 30);
+}
+
+function dDelete(id){
+  const d = D.distractions.find(x => x.id === id);
+  if(!d) return;
+  d.status = 'trashed';
+  d.deletedAt = now();
+  save();
+  render();
+}
+
+/* ================= 分拣 ================= */
+function startSorting(){
+  const q = D.distractions.filter(d => d.status === 'pile').sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''));
+  if(!q.length) return;
+  sortQueue = q.map(d => d.id);
+  sortIndex = 0;
+  sortTotal = sortQueue.length;
+  sortBusy = false;
+  go('sorting');
+}
+
+function sortingHTML(){
+  const d = D.distractions.find(x => x.id === sortQueue[sortIndex]);
+  const done = sortTotal - sortQueue.length;
+  return `<div class="sort">
+    <div class="head">
+      <b>分拣</b>
+      <div class="grow"></div>
+      <button class="btn" onclick="endSort()">结束</button>
+    </div>
+    <div class="zone" onclick="sortTake('up')">↑ 传送带 · 上滑或点击 → 转为待办</div>
+    <div class="stage">
+      ${d ? `<div class="stagewrap">
+        <div class="cardrow">
+          <div class="sortcard" id="sortCard"><div>${esc(d.content)}</div><div class="muted" style="margin-top:10px;font-size:12px">按住卡片上下拖动</div></div>
+          <button class="btn" onclick="sortLater()">等等</button>
+        </div>
+        <div class="counter">(${done + 1}/${sortTotal})</div>
+      </div>` : ''}
+    </div>
+    <div class="zone" onclick="sortTake('down')" style="flex:none;height:76px">垃圾桶 · 下滑或点击 → 删除</div>
+    <div class="foot">
+      <span class="muted">仅响应上下滑动，左右滑动不响应</span>
+    </div>
+  </div>`;
+}
+
+function endSort(){
+  sortQueue = [];
+  sortIndex = 0;
+  sortTotal = 0;
+  go('distractions');
+}
+
+function sortTake(how){
+  if(sortBusy) return;
+  const id = sortQueue[sortIndex];
+  if(!id) return;
+  sortBusy = true;
+  const card = $('#sortCard');
+  if(card){
+    card.style.transition = 'transform .22s ease, opacity .22s ease';
+    card.style.transform = how === 'up' ? 'translateY(-260px)' : 'translateY(260px)';
+    card.style.opacity = '0';
+  }
+  setTimeout(() => {
+    const d = D.distractions.find(x => x.id === id);
+    if(!d){ sortBusy = false; return; }
+    if(how === 'up'){
+      D.tasks.push({
+        id: uid('t'), title: d.content, reference: '', notes: '',
+        status: 'active', folderId: null, originTodo: 1, tagIds: [],
+        createdAt: now(), updatedAt: now()
+      });
+      d.status = 'converted';
+    } else {
+      d.status = 'trashed';
+      d.deletedAt = now();
+    }
+    save();
+    sortQueue.splice(sortIndex, 1);
+    sortBusy = false;
+    if(!sortQueue.length){
+      toast('最后一张');
+      setTimeout(() => { if(view === 'sorting') go('distractions'); }, 900);
+      render();
+      return;
+    }
+    if(sortIndex >= sortQueue.length) sortIndex = 0;
+    render();
+  }, 240);
+}
+
+function sortLater(){
+  if(sortBusy || !sortQueue.length) return;
+  if(sortIndex < sortQueue.length - 1){
+    const id = sortQueue.splice(sortIndex, 1)[0];
+    sortQueue.push(id);
+  }
+  render();
+}
+
+function mountSort(){
+  const card = $('#sortCard');
+  if(!card) return;
+  let sy = null, dy = 0;
+  card.addEventListener('pointerdown', e => {
+    if(sortBusy) return;
+    sy = e.clientY; dy = 0;
+    card.classList.add('drag');
+    try{ card.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  card.addEventListener('pointermove', e => {
+    if(sy === null) return;
+    dy = e.clientY - sy;
+    card.style.transform = `translateY(${dy}px) rotate(${Math.max(-6, Math.min(6, dy / 22))}deg)`;
+  });
+  const finish = () => {
+    if(sy === null) return;
+    sy = null;
+    card.classList.remove('drag');
+    if(dy < -70) sortTake('up');
+    else if(dy > 70) sortTake('down');
+    else {
+      card.style.transition = 'transform .16s ease';
+      card.style.transform = '';
+    }
+  };
+  card.addEventListener('pointerup', finish);
+  card.addEventListener('pointercancel', finish);
+}
+
+/* ================= 任务栏 ================= */
+function filteredActive(){
+  const all = D.tasks.filter(t => t.status === 'active' && !t.originTodo)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  if(filterAll) return all;
+  return all.filter(t => (t.tagIds || []).some(id => filterTags.includes(id)));
+}
+
+function pageTasks(){
+  const list = filteredActive();
+  const allOn = filterAll || !D.tags.length;
+  const tagbar = `<div class="tagbar">
+    <span class="chip ${allOn ? 'on' : ''}" onclick="pickAll()">全部</span>
+    ${D.tags.map(g => tagChip(g, filterTags.includes(g.id), `pickTag('${g.id}')`, `tagMenu(event,'${g.id}')`)).join('')}
+    <button class="btn sm ghost" onclick="newTag('filter')">+ 新建标签</button>
+  </div>`;
+  const inner = `${tagbar}
+    ${list.length ? list.map(taskRowHTML).join('') : `<div class="empty"><div class="ph">EMPTY</div>还没有任务，点击 + 新建。</div>`}
+    <p class="muted" style="margin-top:14px">左键点击任务进入详情，右键点击可选择删除。</p>`;
+  return {
+    title: '任务栏',
+    flow: '③ 主线 · 进行中',
+    actions: `<button class="btn primary" onclick="newTask()">+ 新建任务</button>`,
+    inner,
+    nav: 'tasks'
+  };
+}
+
+function pickAll(){
+  filterAll = true;
+  filterTags = D.tags.map(g => g.id);
+  D.filterTagIds = [];
+  save(); render();
+}
+
+function pickTag(id){
+  if(filterAll){
+    filterAll = false;
+    filterTags = D.tags.map(g => g.id).filter(x => x !== id);
+  } else {
+    const i = filterTags.indexOf(id);
+    if(i >= 0) filterTags.splice(i, 1);
+    else filterTags.push(id);
+  }
+  if(!filterTags.length || filterTags.length === D.tags.length){
+    filterAll = true;
+    filterTags = D.tags.map(g => g.id);
+  }
+  D.filterTagIds = filterAll ? [] : filterTags.slice();
+  save(); render();
+}
+
+function tagMenu(e, id){
+  e.preventDefault();
+  showMenu(e.clientX, e.clientY, [
+    { label: '重命名', onClick: () => renameTag(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delTag(id) }
+  ]);
+}
+
+async function renameTag(id){
+  const g = findTag(id);
+  if(!g) return;
+  const v = await promptDlg({
+    title: '重命名标签',
+    label: '标签名',
+    value: g.name,
+    max: 20,
+    ok: '保存',
+    validate: v => {
+      if(!v) return '请输入标签名';
+      if(v.length > 20) return '请输入不超过 20 个字符的标签名';
+      if(D.tags.some(x => x.id !== id && x.name === v)) return '标签名已存在';
+      return '';
+    }
+  });
+  if(v == null) return;
+  g.name = v;
+  save(); render();
+}
+
+async function delTag(id){
+  const used = D.tasks.filter(t => (t.tagIds || []).includes(id)).length;
+  if(used > 0){
+    openModal({
+      title: '无法删除',
+      body: `<div class="mtext">该标签已被 ${used} 个任务使用，无法删除。</div>`,
+      footer: `<button class="btn primary" onclick="closeModal()">知道了</button>`
+    });
+    return;
+  }
+  const ok = await confirmDlg({ title: '删除标签', message: '确认删除（该标签）？', ok: '删除' });
+  if(!ok) return;
+  D.tags = D.tags.filter(t => t.id !== id);
+  filterTags = filterTags.filter(x => x !== id);
+  if(!filterTags.length){
+    filterAll = true;
+    filterTags = D.tags.map(g => g.id);
+  }
+  D.filterTagIds = filterAll ? [] : filterTags.slice();
+  save();
+  toast('标签已删除');
+  render();
+}
+
+function newTag(from){
+  const palette = ['#111111', '#666666', '#b3261e', '#1f6f43', '#1d4ed8', '#8b5cf6', '#f2c94c', '#ffffff'];
+  ntColor = '#ffffff';
+  const mask = openModal({
+    title: '新建标签',
+    body: `<label class="muted">标签名（1-20 个字符）</label>
+      <input class="input" id="ntName" maxlength="20" placeholder="请输入标签名" style="margin:6px 0 12px">
+      <label class="muted">颜色</label>
+      <div class="sw" style="margin-top:6px">${palette.map(c => `<button data-c="${c}" style="background:${c}" class="${c === ntColor ? 'on' : ''}" onclick="ntPick(this)"></button>`).join('')}</div>
+      <div class="field-error" id="ntErr"></div>`,
+    footer: `<button class="btn ghost" data-c>取消</button><button class="btn primary" data-k>创建</button>`
+  });
+  const inp = mask.querySelector('#ntName');
+  setTimeout(() => inp.focus(), 40);
+  mask.querySelector('[data-c]').onclick = () => closeModal();
+  mask.querySelector('[data-k]').onclick = () => {
+    const v = inp.value.trim();
+    const err = mask.querySelector('#ntErr');
+    if(!v){ err.textContent = '请输入标签名'; return; }
+    if(v.length > 20){ err.textContent = '请输入不超过 20 个字符的标签名'; return; }
+    if(D.tags.some(g => g.name === v)){ err.textContent = '标签名已存在'; return; }
+    const g = { id: uid('g'), name: v, color: ntColor };
+    D.tags.push(g);
+    if(from === 'editor' && editDraft){
+      if(!editDraft.tagIds.includes(g.id)) editDraft.tagIds.push(g.id);
+      save(); closeModal(); touch(); render();
+      return;
+    }
+    filterAll = false;
+    filterTags = [g.id];
+    D.filterTagIds = [g.id];
+    save(); closeModal(); render();
+  };
+}
+
+function ntPick(btn){
+  const box = btn.parentElement;
+  Array.from(box.children).forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  ntColor = btn.dataset.c;
+}
+
+function taskMenu(e, id){
+  e.preventDefault();
+  const t = findTask(id);
+  if(!t) return;
+  showMenu(e.clientX, e.clientY, [
+    { label: '打开详情', onClick: () => openDetail(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delTask(id) }
+  ]);
+}
+
+async function delTask(id){
+  const t = findTask(id);
+  if(!t) return;
+  const ok = await confirmDlg({
+    title: '删除任务',
+    message: `将「${t.title}」移入回收站？`,
+    ok: '移入回收站'
+  });
+  if(!ok) return;
+  t.deletedFromStatus = t.status;
+  t.status = 'trashed';
+  t.deletedAt = now();
+  t.deletedFromFolderId = t.folderId || null;
+  save(); render();
+}
+
+function openDetail(id){
+  detailInfoOpen = true;
+  go('detail', id);
+}
+
+/* ================= 任务详情 ================= */
+function pageDetail(){
+  const t = findTask(detailId);
+  if(!t){
+    return {
+      title: '任务详情', flow: '④ 主线', actions: `<button class="btn" onclick="navTo('tasks')">← 返回</button>`,
+      inner: `<div class="empty">任务不存在或已被删除。</div>`, nav: 'tasks'
+    };
+  }
+  const p = progress(t);
+  const tags = tagsOf(t);
+  const can = canArchive(t);
+  const info = detailInfoOpen ? `
+    <div class="kv"><b>标签</b><div class="taglist">${tags.length ? tags.map(g => `<span class="chip ro"><i class="dot" style="background:${g.color}"></i>${esc(g.name)}</span>`).join('') : '<span class="muted">无标签</span>'}</div></div>
+    <div class="kv"><b>补充资料</b><div>${t.reference ? esc(t.reference) : '<span class="muted">—</span>'}</div></div>
+    <div class="kv"><b>注意事项</b><div>${t.notes ? esc(t.notes) : '<span class="muted">—</span>'}</div></div>` : '<div class="muted">信息区已折叠。</div>';
+  const inner = `
+    <div class="panel">
+      <div class="row" style="margin-bottom:8px">
+        <h2 style="flex:1;margin:0">任务信息</h2>
+        <button class="btn sm ghost" onclick="toggleDetailInfo()">${detailInfoOpen ? '折叠' : '展开'}</button>
+      </div>
+      ${info}
+    </div>
+    <div class="panel">
+      <div class="row">
+        <h2 style="flex:1;margin:0">步骤</h2>
+        <span class="muted">${p.total ? p.pct + '% · ' + p.total + ' 步' : '暂无步骤'}</span>
+      </div>
+      <div class="bar" style="margin:8px 0 14px"><i style="width:${p.pct}%"></i></div>
+      ${detailStepsHTML(t.id)}
+      <div class="row" style="margin-top:16px;justify-content:flex-end">
+        <button class="btn ${can ? 'primary' : ''}" ${can ? '' : 'disabled'} onclick="archiveTask()">完成归档</button>
+      </div>
+      ${can ? '' : '<p class="muted" style="text-align:right;margin:6px 0 0">至少一个顶层步骤，且顶层步骤全部完成或砍掉后才能归档。</p>'}
+    </div>`;
+  return {
+    title: t.title,
+    flow: '④ 主线 · 详情',
+    actions: `<button class="btn" onclick="navTo('tasks')">← 返回</button><button class="btn" onclick="startEdit('${t.id}')">编辑</button>`,
+    inner,
+    nav: 'tasks'
+  };
+}
+
+function toggleDetailInfo(){
+  detailInfoOpen = !detailInfoOpen;
+  render();
+}
+
+function detailStepsHTML(taskId){
+  function level(parentId){
+    return childrenOf(taskId, parentId).map(s => {
+      const kids = childrenOf(taskId, s.id);
+      const cls = s.status === 'cut' ? 'cut' : (s.status === 'completed' ? 'done' : '');
+      const mark = s.status === 'cut' ? '✕' : (s.status === 'completed' ? '✓' : '');
+      return `<div class="step ${cls}" oncontextmenu="stepMenu(event,'${taskId}','${s.id}')">
+        <span class="cb ${s.status === 'completed' ? 'on' : ''} ${s.status === 'cut' ? 'cut' : ''}" onclick="toggleStep('${taskId}','${s.id}')">${mark}</span>
+        <div class="ct">${esc(s.content).replace(/\n/g, '<br>')}</div>
+      </div>` + (kids.length ? `<div class="children">${level(s.id)}</div>` : '');
+    }).join('');
+  }
+  return level(null) || '<div class="muted">暂无步骤</div>';
+}
+
+function toggleStep(taskId, stepId){
+  const s = findStep(stepId);
+  if(!s) return;
+  const next = s.status === 'completed' ? 'pending' : 'completed';
+  applyStatus(taskId, stepId, next);
+  render();
+}
+
+function stepMenu(e, taskId, stepId){
+  e.preventDefault();
+  const s = findStep(stepId);
+  if(!s) return;
+  const items = [
+    {
+      label: s.status === 'cut' ? '取消砍掉' : '砍掉',
+      onClick: () => {
+        applyStatus(taskId, stepId, s.status === 'cut' ? 'pending' : 'cut');
+        render();
+      }
+    },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delStep(taskId, stepId) }
+  ];
+  showMenu(e.clientX, e.clientY, items);
+}
+
+async function delStep(taskId, stepId){
+  const ok = await confirmDlg({ title: '删除步骤', message: '确认删除（该步骤）？', ok: '删除' });
+  if(!ok) return;
+  const ids = new Set([stepId]);
+  let grew = true;
+  while(grew){
+    grew = false;
+    D.steps.forEach(s => {
+      if(s.parentId && ids.has(s.parentId) && !ids.has(s.id)){ ids.add(s.id); grew = true; }
+    });
+  }
+  D.steps = D.steps.filter(s => !ids.has(s.id));
+  recalcAncestors(taskId);
+  save(); render();
+}
+
+function recalcAncestors(taskId){
+  const list = stepsOf(taskId);
+  const depth = s => {
+    let d = 0, p = s.parentId;
+    while(p){ d++; p = (list.find(x => x.id === p) || {}).parentId; }
+    return d;
+  };
+  list.slice().sort((a, b) => depth(b) - depth(a)).forEach(s => {
+    const kids = list.filter(k => k.parentId === s.id);
+    if(kids.length) s.status = kids.every(k => k.status === 'completed' || k.status === 'cut') ? 'completed' : 'pending';
+  });
+}
+
+async function archiveTask(){
+  const t = findTask(detailId);
+  if(!t || !canArchive(t)) return;
+  const folderId = await pickFolder('archive', '选择归档目录');
+  if(folderId == null) return;
+  t.status = 'archived';
+  t.folderId = folderId === 'ROOT' ? null : folderId;
+  t.updatedAt = now();
+  save();
+  toast('归档成功');
+  go('tasks');
+}
+
+/* ================= 任务编辑 ================= */
+function editStepDataReset(){
+  editDraft = {
+    id: uid('t'), title: '', reference: '', notes: '',
+    status: 'active', folderId: null, originTodo: 0, tagIds: [],
+    createdAt: now(), updatedAt: now()
+  };
+  editSteps = [];
+  editDirty = false;
+  editInlineErrors = { title: '', tags: '' };
+  editTodoAsked = false;
+  todoExpanded = true;
+  tagSearch = '';
+}
+
+function newTask(){
+  editIsNew = true;
+  editTaskId = null;
+  editTodoSource = null;
+  editStepDataReset();
+  go('edit');
+}
+
+function startEdit(id){
+  const t = findTask(id);
+  if(!t) return;
+  editIsNew = false;
+  editTaskId = id;
+  editTodoAsked = false;
+  todoExpanded = false;
+  editDraft = JSON.parse(JSON.stringify(t));
+  editSteps = stepsOf(id).map(s => ({ ...s }));
+  editDirty = false;
+  editInlineErrors = { title: '', tags: '' };
+  editTodoSource = t.originTodo === 1 ? id : null;
+  tagSearch = '';
+  go('edit');
+}
+
+function onTitle(v){
+  editDraft.title = v;
+  if(editInlineErrors.title && v.trim()) editInlineErrors.title = '';
+  updateEditorErrors();
+  touch();
+}
+function onRef(v){ editDraft.reference = v; touch(); }
+function onNotes(v){ editDraft.notes = v; touch(); }
+
+function onTagSearch(v){
+  tagSearch = v;
+  renderTagPickerList();
+}
+
+function renderTagPickerList(){
+  const el = $('#tagPickList');
+  if(!el || !editDraft) return;
+  const q = (tagSearch || '').toLowerCase();
+  const avail = D.tags.filter(g => !editDraft.tagIds.includes(g.id) && g.name.toLowerCase().includes(q));
+  el.innerHTML = avail.length
+    ? avail.map(g => `<span class="chip" onclick="addTagToDraft('${g.id}')"><i class="dot" style="background:${g.color}"></i>${esc(g.name)}</span>`).join('')
+    : '<span class="muted">没有匹配的标签</span>';
+}
+
+function addTagToDraft(id){
+  if(!editDraft || editDraft.tagIds.includes(id)) return;
+  editDraft.tagIds.push(id);
+  if(editInlineErrors.tags) editInlineErrors.tags = '';
+  touch(); render();
+}
+
+function removeTagFromDraft(id){
+  if(!editDraft) return;
+  editDraft.tagIds = editDraft.tagIds.filter(x => x !== id);
+  touch(); render();
+}
+
+function toggleTodo(){
+  todoExpanded = !todoExpanded;
+  render();
+}
+
+function loadTodo(id){
+  if(editDraft && editDirty && !commitDraft(false)){
+    toast('请先保存当前任务');
+    return;
+  }
+  startEdit(id);
+}
+
+function touch(){
+  editDirty = true;
+  refreshDirtyHint();
+  clearTimeout(editTimer);
+  editTimer = setTimeout(() => { commitDraft(false); }, 500);
+}
+
+function commitDraft(explicit){
+  clearTimeout(editTimer);
+  if(!editDraft) return false;
+  const title = (editDraft.title || '').trim();
+  const errs = { title: '', tags: '' };
+  if(!title) errs.title = '请填写任务名';
+  if(!(editDraft.tagIds || []).length) errs.tags = '请至少选择一个标签';
+  editInlineErrors = errs;
+  updateEditorErrors();
+  if(errs.title || errs.tags) return false;
+
+  editDraft.title = title;
+  editDraft.updatedAt = now();
+  const exist = findTask(editDraft.id);
+  if(exist) Object.assign(exist, editDraft);
+  else D.tasks.push(JSON.parse(JSON.stringify(editDraft)));
+  D.steps = D.steps.filter(s => s.taskId !== editDraft.id)
+    .concat(editSteps.map(s => ({ ...s, taskId: editDraft.id })));
+  save();
+  editDirty = false;
+  refreshDirtyHint();
+  const silent = !explicit && Date.now() - editSavedAt < 2000;
+  if(!silent) toast('已保存');
+  editSavedAt = Date.now();
+  return true;
+}
+
+async function askTodo(){
+  if(editTodoAsked || !editDraft) return;
+  const t = findTask(editDraft.id);
+  if(!t || t.originTodo !== 1) return;
+  editTodoAsked = true;
+  const yes = await confirmDlg({
+    title: '待办栏',
+    message: '是否将该条目从待办栏移出？',
+    ok: '移出',
+    cancel: '保留'
+  });
+  if(yes){
+    const cur = findTask(editDraft.id);
+    if(cur){ cur.originTodo = 0; cur.updatedAt = now(); save(); }
+    editDraft.originTodo = 0;
+  }
+}
+
+function leaveEditor(){
+  if(!editDraft){ go('tasks'); return; }
+  clearTimeout(editTimer);
+  if(editIsNew && !(editDraft.title || '').trim() && !(editDraft.tagIds || []).length){
+    editDraft = null; editSteps = []; editDirty = false;
+    go('tasks');
+    return;
+  }
+  if(editDirty && !commitDraft(false)){
+    toast('请先完成必填项');
+    return;
+  }
+  const wasNew = editIsNew;
+  const id = editDraft.id;
+  editDraft = null; editSteps = []; editDirty = false;
+  if(wasNew) go('tasks');
+  else go('detail', id);
+}
+
+async function saveEditor(){
+  const wasNew = editIsNew;
+  if(!commitDraft(true)) return;
+  await askTodo();
+  if(wasNew){
+    editDraft = null; editSteps = []; editDirty = false;
+    go('tasks');
+  } else {
+    render();
+  }
+}
+
+function onLeaveEdit(){
+  if(!editDraft) return true;
+  clearTimeout(editTimer);
+  if(!editDirty) return true;
+  return commitDraft(false);
+}
+
+function pageEdit(){
+  if(!editDraft){
+    editIsNew = true;
+    editStepDataReset();
+  }
+  const t = editDraft;
+  const todos = todoItems();
+  const todoHTML = todoExpanded
+    ? (todos.length
+        ? todos.map(x => `<div class="item ${x.id === t.id ? 'on' : ''}" onclick="loadTodo('${x.id}')">${esc(x.title || '（无标题）')}</div>`).join('')
+        : '<div class="muted">暂无待办</div>')
+    : '';
+  const selTags = (t.tagIds || []).map(id => {
+    const g = findTag(id);
+    if(!g) return `<span class="chip ro">未知标签</span>`;
+    return `<span class="chip ro"><i class="dot" style="background:${g.color}"></i>${esc(g.name)}<b style="margin-left:2px;cursor:pointer" onclick="removeTagFromDraft('${id}')">×</b></span>`;
+  }).join('') || '<span class="muted">未选择标签</span>';
+  const todoBlock = todoExpanded
+    ? `<div class="todo">
+        <div class="row" style="margin-bottom:8px">
+          <h3 style="flex:1;margin:0">待办栏</h3>
+          <button class="btn sm ghost" onclick="toggleTodo()">收起 →</button>
+        </div>
+        ${todoHTML}
+      </div>`
+    : `<button class="todoTab" onclick="toggleTodo()" title="展开待办栏">待办栏 ${todos.length}</button>`;
+  const inner = `<div class="editor${todoExpanded ? '' : ' collapsed'}">
+    <div>
+      <div class="panel">
+        <h2>任务信息</h2>
+        <label class="muted">任务名</label>
+        <input class="input" id="fTitle" maxlength="80" value="${esc(t.title)}" placeholder="必填" oninput="onTitle(this.value)" style="margin:4px 0 0">
+        <div class="field-error" id="errTitle">${esc(editInlineErrors.title)}</div>
+        <label class="muted">补充资料</label>
+        <textarea class="input" id="fRef" rows="2" oninput="onRef(this.value)" style="margin:4px 0 0">${esc(t.reference || '')}</textarea>
+        <label class="muted" style="display:block;margin-top:10px">注意事项</label>
+        <textarea class="input" id="fNotes" rows="2" oninput="onNotes(this.value)" style="margin:4px 0 0">${esc(t.notes || '')}</textarea>
+      </div>
+      <div class="panel">
+        <div class="row"><h2 style="flex:1;margin:0 0 8px">标签</h2><span class="muted">至少选择一个</span></div>
+        <div class="taglist">${selTags}</div>
+        <div class="field-error" id="errTags">${esc(editInlineErrors.tags)}</div>
+        <input class="input" placeholder="搜索标签" oninput="onTagSearch(this.value)" style="margin-top:8px">
+        <div class="taglist" id="tagPickList" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:8px"><button class="btn sm ghost" onclick="newTag('editor')">+ 新建标签</button></div>
+      </div>
+      <div class="panel">
+        <div class="row" style="margin-bottom:8px">
+          <h2 style="flex:1;margin:0">步骤</h2>
+          <button class="btn sm" onclick="addStep(null)">+ 新增步骤</button>
+        </div>
+        <div id="stepEditor" class="esteps">${editStepsHTML()}</div>
+        <div class="hintbox">Enter 新增同级步骤 · Shift+Enter 换行 · Tab 缩进 · Shift+Tab 反缩进 · 拖拽排序 · 右键添加子步骤 / 删除</div>
+      </div>
+    </div>
+    ${todoBlock}
+  </div>`;
+  return {
+    title: editIsNew ? '新建任务' : '编辑任务',
+    flow: editIsNew ? '③ 新建 · 待办转化' : '④ 拆解 · 编辑',
+    actions: `<span class="muted" id="dirtyHint">${editDirty ? '未保存的更改' : '已保存'}</span>
+      <button class="btn" onclick="leaveEditor()">← 返回</button>
+      <button class="btn primary" onclick="saveEditor()">保存</button>`,
+    inner,
+    nav: 'tasks'
+  };
+}
+
+function editStepsHTML(){
+  if(!editSteps.length) return '<div class="muted">暂无步骤，点击“新增步骤”。</div>';
+  function rows(pid){
+    return editSteps.filter(s => s.parentId === pid).sort((a, b) => a.sort - b.sort).map(s => {
+      const kidCount = editSteps.filter(k => k.parentId === s.id).length;
+      return `<div class="erow" draggable="true" data-s="${s.id}">
+        <span class="handle" title="拖拽排序">⋮⋮</span>
+        <textarea class="input" data-id="${s.id}" rows="1" placeholder="步骤内容">${esc(s.content)}</textarea>
+        ${kidCount ? `<span class="badge">子 ${kidCount}</span>` : ''}
+      </div>` + (kidCount ? `<div class="kids">${rows(s.id)}</div>` : '');
+    }).join('');
+  }
+  return rows(null);
+}
+
+function addStep(parentId){
+  const sibs = editSteps.filter(s => s.parentId === parentId);
+  editSteps.push({
+    id: uid('s'), taskId: editDraft.id, parentId,
+    content: '', status: 'pending', sort: sibs.length,
+    createdAt: now(), updatedAt: now()
+  });
+  const ns = editSteps[editSteps.length - 1];
+  focusAfter = { id: ns.id };
+  touch(); render();
+}
+
+function insertAfter(id){
+  const cur = editSteps.find(s => s.id === id);
+  if(!cur) return;
+  const sibs = editSteps.filter(s => s.parentId === cur.parentId).sort((a, b) => a.sort - b.sort);
+  sibs.forEach(s => { if(s.sort > cur.sort) s.sort++; });
+  const ns = {
+    id: uid('s'), taskId: editDraft.id, parentId: cur.parentId,
+    content: '', status: 'pending', sort: cur.sort + 1,
+    createdAt: now(), updatedAt: now()
+  };
+  editSteps.push(ns);
+  focusAfter = { id: ns.id };
+  touch(); render();
+}
+
+function indentStep(id){
+  const s = editSteps.find(x => x.id === id);
+  if(!s) return;
+  const sibs = editSteps.filter(k => k.parentId === s.parentId).sort((a, b) => a.sort - b.sort);
+  const i = sibs.findIndex(k => k.id === id);
+  if(i <= 0) return;
+  const prev = sibs[i - 1];
+  const kids = editSteps.filter(k => k.parentId === prev.id);
+  s.parentId = prev.id;
+  s.sort = kids.length;
+  sibs.filter(k => k.id !== id).forEach((k, n) => { k.sort = n; });
+  touch(); render();
+}
+
+function outdentStep(id){
+  const s = editSteps.find(x => x.id === id);
+  if(!s || !s.parentId) return;
+  const parent = editSteps.find(x => x.id === s.parentId);
+  if(!parent) return;
+  const gp = parent.parentId;
+  const sibs = editSteps.filter(k => k.parentId === gp).sort((a, b) => a.sort - b.sort);
+  const idx = sibs.findIndex(k => k.id === parent.id);
+  sibs.forEach((k, n) => { if(n > idx) k.sort++; });
+  s.parentId = gp;
+  s.sort = parent.sort + 1;
+  const oldSibs = editSteps.filter(k => k.parentId === parent.id && k.id !== id).sort((a, b) => a.sort - b.sort);
+  oldSibs.forEach((k, n) => { k.sort = n; });
+  touch(); render();
+}
+
+function editorStepMenu(e, id){
+  e.preventDefault();
+  const s = editSteps.find(x => x.id === id);
+  if(!s) return;
+  showMenu(e.clientX, e.clientY, [
+    { label: '添加子步骤', onClick: () => addStep(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delEditStep(id) }
+  ]);
+}
+
+async function delEditStep(id){
+  const ok = await confirmDlg({ title: '删除步骤', message: '确认删除（该步骤）？', ok: '删除' });
+  if(!ok) return;
+  const ids = new Set([id]);
+  let grew = true;
+  while(grew){
+    grew = false;
+    editSteps.forEach(s => {
+      if(s.parentId && ids.has(s.parentId) && !ids.has(s.id)){ ids.add(s.id); grew = true; }
+    });
+  }
+  editSteps = editSteps.filter(s => !ids.has(s.id));
+  touch(); render();
+}
+
+function reorderSteps(dragId, targetId){
+  const a = editSteps.find(s => s.id === dragId);
+  const b = editSteps.find(s => s.id === targetId);
+  if(!a || !b || a.parentId !== b.parentId) return;
+  const sibs = editSteps.filter(s => s.parentId === a.parentId).sort((x, y) => x.sort - y.sort);
+  const list = sibs.filter(s => s.id !== dragId);
+  const at = list.findIndex(s => s.id === targetId);
+  list.splice(at, 0, a);
+  list.forEach((s, n) => { s.sort = n; });
+  touch();
+}
+
+function mountEditor(){
+  const box = $('#stepEditor');
+  if(!box) return;
+  box.querySelectorAll('textarea[data-id]').forEach(ta => {
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+  });
+  box.addEventListener('input', e => {
+    const ta = e.target.closest('textarea[data-id]');
+    if(!ta) return;
+    const s = editSteps.find(x => x.id === ta.dataset.id);
+    if(!s) return;
+    s.content = ta.value;
+    s.updatedAt = now();
+    ta.style.height = 'auto';
+    ta.style.height = ta.scrollHeight + 'px';
+    touch();
+  });
+  box.addEventListener('keydown', e => {
+    const ta = e.target.closest('textarea[data-id]');
+    if(!ta) return;
+    const id = ta.dataset.id;
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); insertAfter(id); }
+    else if(e.key === 'Tab'){ e.preventDefault(); e.shiftKey ? outdentStep(id) : indentStep(id); }
+  });
+  box.addEventListener('contextmenu', e => {
+    const row = e.target.closest('.erow');
+    if(!row) return;
+    editorStepMenu(e, row.dataset.s);
+  });
+  let dragId = null;
+  box.addEventListener('dragstart', e => {
+    const row = e.target.closest('.erow');
+    if(!row) return;
+    dragId = row.dataset.s;
+    try{ e.dataTransfer.effectAllowed = 'move'; }catch(err){}
+  });
+  box.addEventListener('dragover', e => {
+    const row = e.target.closest('.erow');
+    if(!row || !dragId || row.dataset.s === dragId) return;
+    e.preventDefault();
+    box.querySelectorAll('.erow.ins').forEach(x => x.classList.remove('ins'));
+    row.classList.add('ins');
+  });
+  box.addEventListener('dragleave', e => {
+    const row = e.target.closest('.erow');
+    if(row) row.classList.remove('ins');
+  });
+  box.addEventListener('drop', e => {
+    const row = e.target.closest('.erow');
+    if(!row || !dragId) return;
+    e.preventDefault();
+    const target = row.dataset.s;
+    box.querySelectorAll('.erow.ins').forEach(x => x.classList.remove('ins'));
+    reorderSteps(dragId, target);
+    dragId = null;
+    render();
+  });
+  box.addEventListener('dragend', () => {
+    box.querySelectorAll('.erow.ins').forEach(x => x.classList.remove('ins'));
+    dragId = null;
+  });
+}
+
+/* ================= 图书馆 ================= */
+function setLib(t){ libTab = t; render(); }
+function selFolder(type, id){
+  if(type === 'archive') arcFolder = id; else matFolder = id;
+  render();
+}
+function openArchive(id){ hideCut = false; go('archive', id); }
+function toggleHideCut(){ hideCut = !hideCut; render(); }
+
+function treeHTML(type, sel, parentId, depth){
+  return folderKids(type, parentId)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+    .map(f => {
+      const kids = folderKids(type, f.id).length;
+      return `<div class="node ${sel === f.id ? 'on' : ''}" style="padding-left:${8 + depth * 14}px"
+          onclick="selFolder('${type}','${f.id}')" oncontextmenu="folderMenu(event,'${f.id}')">
+          ${kids ? '▾' : '·'} ${esc(f.name)}
+        </div>` + (kids ? treeHTML(type, sel, f.id, depth + 1) : '');
+    }).join('');
+}
+
+function archiveView(){
+  const fid = arcFolder === 'ROOT' ? null : arcFolder;
+  const list = D.tasks.filter(t => t.status === 'archived' && (t.folderId || null) === fid)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  return `<div class="split">
+    <div class="tree">
+      <div class="node ${arcFolder === 'ROOT' ? 'on' : ''}" onclick="selFolder('archive','ROOT')" oncontextmenu="rootFolderMenu(event,'archive')">根目录</div>
+      ${treeHTML('archive', arcFolder, null, 0)}
+      <div class="row" style="margin-top:8px"><button class="btn sm ghost" onclick="newFolder('archive')">+ 新建文件夹</button></div>
+    </div>
+    <div>
+      <div class="libhead"><span class="muted" style="flex:1">${list.length} 个档案</span></div>
+      ${list.length
+        ? list.map(t => `<div class="card" onclick="openArchive('${t.id}')" oncontextmenu="archiveMenu(event,'${t.id}')">
+            <div class="t">${esc(t.title)}</div>
+            <div class="s">归档于 ${fmt(t.updatedAt)}</div>
+          </div>`).join('')
+        : `<div class="empty">该目录下暂无档案。</div>`}
+    </div>
+  </div>`;
+}
+
+function materialView(){
+  const fid = matFolder === 'ROOT' ? null : matFolder;
+  const files = D.files.filter(f => !f.deletedAt && f.folderId === fid)
+    .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  return `<div class="split">
+    <div class="tree">
+      <div class="node ${matFolder === 'ROOT' ? 'on' : ''}" onclick="selFolder('material','ROOT')" oncontextmenu="rootFolderMenu(event,'material')">根目录</div>
+      ${treeHTML('material', matFolder, null, 0)}
+      <div class="row" style="margin-top:8px"><button class="btn sm ghost" onclick="newFolder('material')">+ 新建文件夹</button></div>
+    </div>
+    <div>
+      <div class="libhead">
+        <span class="muted" style="flex:1">${files.length} 个文件</span>
+        <input type="file" id="upIn" multiple style="display:none" onchange="onUpload(this)">
+        <button class="btn sm" onclick="document.getElementById('upIn').click()">上传文件</button>
+      </div>
+      ${files.length
+        ? files.map(f => `<div class="file" onclick="viewFile('${f.id}')" oncontextmenu="fileMenu(event,'${f.id}')">
+            <span class="nm">${esc(f.originalName)}</span>
+            <span class="muted">${fmt(f.createdAt)}</span>
+          </div>`).join('') + '<p class="muted" style="margin-top:10px">左键点击文件查看，右键点击删除。</p>'
+        : `<div class="empty">该目录下暂无文件。</div>`}
+    </div>
+  </div>`;
+}
+
+function pageLibrary(){
+  const inner = `<div class="row" style="margin-bottom:14px">
+      <button class="btn ${libTab === 'archive' ? 'primary' : ''}" onclick="setLib('archive')">档案馆</button>
+      <button class="btn ${libTab === 'material' ? 'primary' : ''}" onclick="setLib('material')">资料室</button>
+    </div>` + (libTab === 'archive' ? archiveView() : materialView());
+  return { title: '图书馆', flow: '⑦ 归档后 · 沉淀', actions: '', inner, nav: 'library' };
+}
+
+function pageArchive(){
+  const t = findTask(detailId);
+  if(!t || t.status !== 'archived'){
+    return { title: '档案详情', flow: '⑦ 归档后', actions: `<button class="btn" onclick="navTo('library')">← 返回</button>`,
+      inner: `<div class="empty">档案不存在。</div>`, nav: 'library' };
+  }
+  const p = progress(t);
+  const tags = tagsOf(t);
+  const inner = `<div class="panel">
+      <div class="row" style="margin-bottom:8px">
+        <h2 style="flex:1;margin:0">档案信息</h2>
+        <button class="btn sm" onclick="toggleHideCut()">${hideCut ? '显示已砍内容' : '隐藏已砍内容'}</button>
+      </div>
+      <div class="kv"><b>标签</b><div class="taglist">${tags.length ? tags.map(g => `<span class="chip ro"><i class="dot" style="background:${g.color}"></i>${esc(g.name)}</span>`).join('') : '<span class="muted">无标签</span>'}</div></div>
+      <div class="kv"><b>补充资料</b><div>${t.reference ? esc(t.reference) : '<span class="muted">—</span>'}</div></div>
+      <div class="kv"><b>注意事项</b><div>${t.notes ? esc(t.notes) : '<span class="muted">—</span>'}</div></div>
+      <div class="kv"><b>归档于</b><div>${fmt(t.updatedAt)}</div></div>
+    </div>
+    <div class="panel">
+      <div class="row"><h2 style="flex:1;margin:0">步骤</h2><span class="muted">${p.total ? p.pct + '% · ' + p.total + ' 步' : '暂无步骤'}</span></div>
+      <div class="bar" style="margin:8px 0 14px"><i style="width:${p.pct}%"></i></div>
+      ${archiveStepsHTML(t.id)}
+      <p class="muted" style="margin-top:12px">档案详情只读，仅可切换“隐藏已砍内容”。</p>
+    </div>`;
+  return {
+    title: t.title,
+    flow: '⑦ 归档后 · 档案',
+    actions: `<button class="btn" onclick="navTo('library')">← 返回</button><button class="btn danger" onclick="delArchive('${t.id}')">删除</button>`,
+    inner,
+    nav: 'library'
+  };
+}
+
+function archiveStepsHTML(taskId){
+  function level(pid){
+    return childrenOf(taskId, pid)
+      .filter(s => !hideCut || s.status !== 'cut')
+      .map(s => {
+        const allKids = childrenOf(taskId, s.id);
+        const kids = level(s.id);
+        const note = (hideCut && s.status !== 'cut' && allKids.length && allKids.every(k => k.status === 'cut'))
+          ? ' <span class="muted">（子步骤均已砍掉）</span>' : '';
+        const cls = s.status === 'cut' ? 'cut' : (s.status === 'completed' ? 'done' : '');
+        const mark = s.status === 'cut' ? '✕' : (s.status === 'completed' ? '✓' : '');
+        return `<div class="step ${cls}">
+          <span class="cb ${s.status === 'completed' ? 'on' : ''} ${s.status === 'cut' ? 'cut' : ''}" style="cursor:default">${mark}</span>
+          <div class="ct">${esc(s.content).replace(/\n/g, '<br>')}${note}</div>
+        </div>` + (kids ? `<div class="children">${kids}</div>` : '');
+      }).join('');
+  }
+  return level(null) || '<div class="muted">暂无步骤</div>';
+}
+
+async function delArchive(id){
+  const t = findTask(id);
+  if(!t) return;
+  const ok = await confirmDlg({ title: '删除档案', message: `将「${t.title}」移入回收站？`, ok: '移入回收站' });
+  if(!ok) return;
+  t.deletedFromStatus = 'archived';
+  t.status = 'trashed';
+  t.deletedAt = now();
+  t.deletedFromFolderId = t.folderId || null;
+  save();
+  go('library');
+}
+
+function archiveMenu(e, id){
+  e.preventDefault();
+  showMenu(e.clientX, e.clientY, [
+    { label: '打开档案', onClick: () => openArchive(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delArchive(id) }
+  ]);
+}
+
+function folderMenu(e, id){
+  e.preventDefault();
+  const f = findFolder(id);
+  if(!f) return;
+  showMenu(e.clientX, e.clientY, [
+    { label: '添加子目录', onClick: () => newFolder(f.type, f.id) },
+    { label: '重命名', onClick: () => renameFolder(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delFolder(id) }
+  ]);
+}
+
+function rootFolderMenu(e, type){
+  e.preventDefault();
+  showMenu(e.clientX, e.clientY, [
+    { label: '添加子目录', onClick: () => newFolder(type, 'ROOT') }
+  ]);
+}
+
+async function newFolder(type, parentId){
+  const base = parentId === undefined
+    ? (type === 'archive' ? arcFolder : matFolder)
+    : parentId;
+  const parent = base === 'ROOT' ? null : base;
+  const name = await promptDlg({
+    title: '新建文件夹',
+    label: '文件夹名（1-20 个字符）',
+    max: 20,
+    ok: '创建',
+    validate: v => {
+      if(!v) return '请输入文件夹名';
+      if(v.length > 20) return '请输入不超过 20 个字符的文件夹名';
+      if(D.folders.some(f => f.type === type && (f.parentId || null) === parent && f.name === v)) return '同目录下不可同名';
+      return '';
+    }
+  });
+  if(name == null) return;
+  const f = { id: uid('f'), name, parentId: parent, type };
+  D.folders.push(f);
+  save();
+  if(type === 'archive') arcFolder = f.id; else matFolder = f.id;
+  render();
+}
+
+async function renameFolder(id){
+  const f = findFolder(id);
+  if(!f) return;
+  const name = await promptDlg({
+    title: '重命名文件夹',
+    label: '文件夹名（1-20 个字符）',
+    value: f.name,
+    max: 20,
+    ok: '保存',
+    validate: v => {
+      if(!v) return '请输入文件夹名';
+      if(v.length > 20) return '请输入不超过 20 个字符的文件夹名';
+      if(D.folders.some(x => x.id !== id && x.type === f.type && (x.parentId || null) === (f.parentId || null) && x.name === v)) return '同目录下不可同名';
+      return '';
+    }
+  });
+  if(name == null) return;
+  f.name = name;
+  save(); render();
+}
+
+function folderBusy(id){
+  return D.folders.some(f => f.parentId === id)
+    || D.files.some(f => f.folderId === id && !f.deletedAt)
+    || D.tasks.some(t => t.status === 'archived' && t.folderId === id);
+}
+
+async function delFolder(id){
+  if(folderBusy(id)){
+    openModal({
+      title: '无法删除',
+      body: `<div class="mtext">该文件夹下仍有内容，无法删除。</div>`,
+      footer: `<button class="btn primary" onclick="closeModal()">知道了</button>`
+    });
+    return;
+  }
+  const ok = await confirmDlg({ title: '删除文件夹', message: '确认删除（该文件夹）？', ok: '删除' });
+  if(!ok) return;
+  D.folders = D.folders.filter(f => f.id !== id);
+  save();
+  if(arcFolder === id) arcFolder = 'ROOT';
+  if(matFolder === id) matFolder = 'ROOT';
+  render();
+}
+
+function fileMenu(e, id){
+  e.preventDefault();
+  showMenu(e.clientX, e.clientY, [
+    { label: '查看', onClick: () => viewFile(id) },
+    { label: '-', onClick: null },
+    { label: '删除', danger: true, onClick: () => delFile(id) }
+  ]);
+}
+
+function viewFile(id){
+  const f = D.files.find(x => x.id === id);
+  if(!f) return;
+  openModal({
+    title: '查看文件',
+    body: `<div class="empty" style="padding:28px 20px;margin-bottom:12px">
+        <div class="ph">FILE</div>文件预览占位
+      </div>
+      <div class="kv"><b>文件名</b><div>${esc(f.originalName)}</div></div>
+      <div class="kv"><b>所在目录</b><div>${esc(folderName(f.folderId))}</div></div>
+      <div class="kv"><b>上传时间</b><div>${fmt(f.createdAt)}</div></div>
+      <div class="kv"><b>大小</b><div>${f.size ? Math.round(f.size / 1024) + ' KB' : '—'}</div></div>`,
+    footer: `<button class="btn primary" onclick="closeModal()">关闭</button>`
+  });
+}
+
+async function delFile(id){
+  const f = D.files.find(x => x.id === id);
+  if(!f) return;
+  const ok = await confirmDlg({ title: '删除文件', message: `将「${f.originalName}」移入回收站？`, ok: '移入回收站' });
+  if(!ok) return;
+  f.deletedAt = now();
+  f.deletedFromFolderId = f.folderId || null;
+  save(); render();
+}
+
+function onUpload(inp){
+  const folder = matFolder === 'ROOT' ? null : matFolder;
+  const list = Array.from(inp.files || []);
+  list.forEach(f => {
+    let name = f.name;
+    const same = n => D.files.some(x => !x.deletedAt && x.folderId === folder && x.originalName === n);
+    if(same(name)){
+      const dot = name.lastIndexOf('.');
+      const base = dot > 0 ? name.slice(0, dot) : name;
+      const ext = dot > 0 ? name.slice(dot) : '';
+      let i = 1;
+      while(same(`${base}_${i}${ext}`)) i++;
+      name = `${base}_${i}${ext}`;
+    }
+    D.files.push({
+      id: uid('m'), folderId: folder, originalName: name, size: f.size || 0,
+      createdAt: now(), deletedAt: null, deletedFromFolderId: null
+    });
+  });
+  inp.value = '';
+  save();
+  if(list.length) toast('上传完成');
+  render();
+}
+
+/* ================= 目录选择器（归档 / 恢复共用） ================= */
+function ftPick(id){
+  if(!pickState) return;
+  pickState.sel = id;
+  pickState.refresh();
+}
+
+function ftTree(type, sel, parentId, depth){
+  return folderKids(type, parentId)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh'))
+    .map(f => {
+      const kids = folderKids(type, f.id).length;
+      return `<div class="node ${sel === f.id ? 'on' : ''}" style="padding-left:${8 + depth * 14}px" onclick="ftPick('${f.id}')">
+          ${kids ? '▾' : '·'} ${esc(f.name)}
+        </div>` + (kids ? ftTree(type, sel, f.id, depth + 1) : '');
+    }).join('');
+}
+
+async function ftNew(){
+  const st = pickState;
+  if(!st) return;
+  const parent = st.sel === 'ROOT' ? null : st.sel;
+  const name = await promptDlg({
+    title: '新建文件夹',
+    label: '文件夹名（1-20 个字符）',
+    max: 20,
+    ok: '创建',
+    validate: v => {
+      if(!v) return '请输入文件夹名';
+      if(D.folders.some(f => f.type === st.type && (f.parentId || null) === parent && f.name === v)) return '同目录下不可同名';
+      return '';
+    }
+  });
+  if(name == null) return;
+  const f = { id: uid('f'), name, parentId: parent, type: st.type };
+  D.folders.push(f);
+  save();
+  st.sel = f.id;
+  st.refresh();
+}
+
+function pickFolder(type, title, preselect){
+  return new Promise(resolve => {
+    let done = false;
+    let sel = preselect || 'ROOT';
+    const note = mask => {
+      const el = mask.querySelector('#ftNote');
+      if(el){ const f = findFolder(sel); el.textContent = '已选：' + (sel === 'ROOT' ? '根目录' : (f ? f.name : '根目录')); }
+    };
+    const sink = {
+      type,
+      get sel(){ return sel; },
+      set sel(v){ sel = v; },
+      refresh: () => {}
+    };
+    pickState = sink;
+    const body = () => `<div id="ftree" class="tree">
+        <div class="node ${sel === 'ROOT' ? 'on' : ''}" onclick="ftPick('ROOT')">根目录</div>
+        ${ftTree(type, sel, null, 0)}
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn sm" onclick="ftNew()">+ 新建文件夹</button>
+        <span class="muted" id="ftNote"></span>
+      </div>`;
+    const mask = openModal({
+      title,
+      wide: true,
+      body: body(),
+      footer: `<button class="btn ghost" data-c>取消</button><button class="btn primary" data-k>确定</button>`,
+      onClose: () => { pickState = null; if(!done) resolve(null); }
+    });
+    sink.refresh = () => {
+      const box = mask.querySelector('#ftree');
+      if(box){
+        box.innerHTML = `<div class="node ${sel === 'ROOT' ? 'on' : ''}" onclick="ftPick('ROOT')">根目录</div>` + ftTree(type, sel, null, 0);
+      }
+      note(mask);
+    };
+    note(mask);
+    mask.querySelector('[data-k]').onclick = () => { done = true; const v = sel; closeModal(); resolve(v); };
+    mask.querySelector('[data-c]').onclick = () => { done = true; closeModal(); resolve(null); };
+  });
+}
+
+/* ================= 回收站 ================= */
+function recycleItems(){
+  const arr = [];
+  D.distractions.filter(d => d.status === 'trashed').forEach(d => {
+    arr.push({ key: 'distraction:' + d.id, kind: 'distraction', id: d.id, name: d.content, at: d.deletedAt, type: '杂物' });
+  });
+  D.tasks.filter(t => t.status === 'trashed').forEach(t => {
+    arr.push({ key: 'task:' + t.id, kind: 'task', id: t.id, name: t.title, at: t.deletedAt, type: t.deletedFromStatus === 'archived' ? '档案' : '任务' });
+  });
+  D.files.filter(f => f.deletedAt).forEach(f => {
+    arr.push({ key: 'file:' + f.id, kind: 'file', id: f.id, name: f.originalName, at: f.deletedAt, type: '文件' });
+  });
+  return arr.sort((a, b) => (b.at || '').localeCompare(a.at || ''));
+}
+
+function pageRecycle(){
+  const items = recycleItems();
+  const all = items.length > 0 && selRecycle.size === items.length;
+  const inner = `<div class="row" style="margin-bottom:12px">
+      <button class="btn sm" onclick="recAll()">${all ? '取消全选' : '全选'}</button>
+      <span class="grow"></span>
+      <button class="btn" ${selRecycle.size ? '' : 'disabled'} onclick="restoreSelected()">恢复</button>
+      <button class="btn danger" ${selRecycle.size ? '' : 'disabled'} onclick="purgeSelected()">彻底清除</button>
+    </div>
+    ${items.length
+      ? items.map(it => `<div class="recrow" onclick="selRec('${it.key}')">
+          <input type="checkbox" ${selRecycle.has(it.key) ? 'checked' : ''} onclick="event.stopPropagation();selRec('${it.key}')">
+          <span>${esc(it.name)}</span>
+          <span class="badge">${it.type}</span>
+          <span class="muted">${fmt(it.at)}</span>
+        </div>`).join('')
+      : `<div class="empty">回收站是空的。</div>`}
+    <p class="muted" style="margin-top:14px">恢复时若原目录不存在，需要重新选择目录；取消则保留在回收站。</p>`;
+  return {
+    title: '回收站',
+    flow: '⑧ 兜底 · 删除恢复',
+    actions: `<button class="btn" onclick="navTo('settings')">← 返回设置</button>`,
+    inner,
+    nav: 'settings'
+  };
+}
+
+function selRec(key){
+  if(selRecycle.has(key)) selRecycle.delete(key);
+  else selRecycle.add(key);
+  render();
+}
+
+function recAll(){
+  const items = recycleItems();
+  if(selRecycle.size === items.length) selRecycle.clear();
+  else items.forEach(i => selRecycle.add(i.key));
+  render();
+}
+
+function pickTags(){
+  return new Promise(resolve => {
+    let done = false;
+    rtPicked = new Set();
+    const body = () => `<div class="muted">该任务没有有效标签，恢复前至少选择一个。</div>
+      <div class="taglist" style="margin-top:10px">${D.tags.map(g => `<label class="chip ${rtPicked.has(g.id) ? 'on' : ''}">
+        <input type="checkbox" ${rtPicked.has(g.id) ? 'checked' : ''} onchange="rtToggle('${g.id}',this.checked)" style="margin-right:4px">
+        <i class="dot" style="background:${g.color}"></i>${esc(g.name)}
+      </label>`).join('')}</div>
+      <div class="field-error" id="rtErr"></div>`;
+    const mask = openModal({
+      title: '选择标签',
+      body: body(),
+      footer: `<button class="btn ghost" data-c>取消</button><button class="btn primary" data-k>恢复</button>`,
+      onClose: () => { rtRefresh = null; if(!done) resolve(null); }
+    });
+    rtRefresh = () => { mask.querySelector('.mbody').innerHTML = body(); };
+    mask.querySelector('[data-c]').onclick = () => { done = true; closeModal(); resolve(null); };
+    mask.querySelector('[data-k]').onclick = () => {
+      if(!rtPicked.size){ mask.querySelector('#rtErr').textContent = '请至少选择一个标签'; return; }
+      done = true;
+      const arr = Array.from(rtPicked);
+      closeModal();
+      resolve(arr);
+    };
+  });
+}
+
+function rtToggle(id, on){
+  if(on) rtPicked.add(id); else rtPicked.delete(id);
+  if(rtRefresh) rtRefresh();
+}
+
+async function restoreOne(kind, id){
+  if(kind === 'distraction'){
+    const d = D.distractions.find(x => x.id === id);
+    if(!d) return false;
+    d.status = 'pile';
+    d.deletedAt = null;
+    return true;
+  }
+  if(kind === 'task'){
+    const t = D.tasks.find(x => x.id === id);
+    if(!t) return false;
+    let tags = (t.tagIds || []).filter(g => findTag(g));
+    if(!tags.length){
+      const picked = await pickTags();
+      if(!picked){ toast('已取消恢复'); return false; }
+      tags = picked;
+    }
+    const wasArchived = t.deletedFromStatus === 'archived' || !!t.deletedFromFolderId;
+    if(wasArchived){
+      let fid = t.deletedFromFolderId || null;
+      if(fid && !findFolder(fid)){
+        const p = await pickFolder('archive', '原目录不存在，请选择新目录');
+        if(p == null){ toast('已取消恢复'); return false; }
+        fid = p === 'ROOT' ? null : p;
+      }
+      t.status = 'archived';
+      t.folderId = fid;
+    } else {
+      t.status = 'active';
+      t.folderId = null;
+    }
+    t.tagIds = tags;
+    t.deletedAt = null;
+    t.deletedFromFolderId = null;
+    delete t.deletedFromStatus;
+    t.updatedAt = now();
+    return true;
+  }
+  if(kind === 'file'){
+    const f = D.files.find(x => x.id === id);
+    if(!f) return false;
+    if(!findFolder(f.folderId)){
+      const p = await pickFolder('material', '原目录不存在，请选择新目录');
+      if(p == null || p === 'ROOT'){ toast('已取消恢复'); return false; }
+      f.folderId = p;
+    }
+    f.deletedAt = null;
+    f.deletedFromFolderId = null;
+    return true;
+  }
+  return false;
+}
+
+async function restoreSelected(){
+  const keys = Array.from(selRecycle);
+  let ok = 0;
+  for(const key of keys){
+    const parts = key.split(':');
+    const kind = parts[0], id = parts.slice(1).join(':');
+    const res = await restoreOne(kind, id);
+    if(res) ok++;
+  }
+  selRecycle.clear();
+  save(); render();
+  if(ok) toast('恢复完成');
+}
+
+async function purgeSelected(){
+  if(!selRecycle.size) return;
+  const ok = await confirmDlg({
+    title: '彻底清除',
+    message: `确认彻底清除已选的 ${selRecycle.size} 项？物理删除后不可恢复。`,
+    ok: '彻底清除'
+  });
+  if(!ok) return;
+  const keys = Array.from(selRecycle);
+  keys.forEach(key => {
+    const parts = key.split(':');
+    const kind = parts[0], id = parts.slice(1).join(':');
+    if(kind === 'distraction') D.distractions = D.distractions.filter(x => x.id !== id);
+    if(kind === 'task') D.tasks = D.tasks.filter(x => x.id !== id);
+    if(kind === 'file') D.files = D.files.filter(x => x.id !== id);
+  });
+  selRecycle.clear();
+  save(); render();
+  toast('清除完成');
+}
+
+/* ================= 设置 ================= */
+function setTheme(t){
+  D.theme = t;
+  save();
+  render();
+}
+
+function validPath(p){
+  return /^[A-Za-z]:[\\/]/.test(p) || p.startsWith('/');
+}
+
+async function changeStorage(){
+  const p = await promptDlg({
+    title: '更改存储位置',
+    label: '新目录路径',
+    value: D.storagePath,
+    ok: '开始迁移',
+    validate: v => v ? '' : '路径不能为空'
+  });
+  if(p == null){
+    if(view === 'error') go('settings');
+    return;
+  }
+  if(!validPath(p)){
+    storageFailPath = p;
+    dbError = true;
+    go('error');
+    return;
+  }
+  if(p === D.storagePath){ toast('目录未变化'); return; }
+  dbError = false;
+  runMigration(p);
+}
+
+function runMigration(p){
+  const mask = openModal({
+    title: '正在迁移存储位置',
+    dismissible: false,
+    body: `<div class="muted" id="mgTxt">正在复制数据…</div>
+      <div class="bar" style="height:8px;margin-top:12px"><i id="mgBar" style="width:0%"></i></div>
+      <p class="muted" style="margin:12px 0 0">迁移过程中不可取消，仅显示进度。</p>`,
+    footer: ''
+  });
+  let pct = 0;
+  const tm = setInterval(() => {
+    if(!document.body.contains(mask)){ clearInterval(tm); return; }
+    pct = Math.min(100, pct + 10);
+    const bar = mask.querySelector('#mgBar');
+    const txt = mask.querySelector('#mgTxt');
+    if(bar) bar.style.width = pct + '%';
+    if(txt) txt.textContent = `正在复制数据…（${Math.min(12, Math.max(1, Math.ceil(pct / 100 * 12)))}/12）`;
+    if(pct >= 100){
+      clearInterval(tm);
+      setTimeout(() => finishMigration(p), 200);
+    }
+  }, 140);
+}
+
+async function finishMigration(p){
+  closeAllModals();
+  D.storagePath = p;
+  dbError = false;
+  save();
+  toast('迁移成功');
+  const delOld = await confirmDlg({
+    title: '旧目录处理',
+    message: '数据已迁移到新目录。是否保留旧目录数据？',
+    ok: '删除旧目录',
+    cancel: '保留旧目录'
+  });
+  if(delOld) toast('旧目录已删除');
+  if(view === 'error') go('settings');
+  else render();
+}
+
+function retryStorage(){
+  dbError = false;
+  if(storageFailPath && validPath(storageFailPath)) runMigration(storageFailPath);
+  else changeStorage();
+}
+
+function pageSettings(){
+  const inner = `<div class="panel">
+      <h2>外观</h2>
+      <div class="settingrow">
+        <span>主题</span>
+        <div class="sw">
+          <button style="background:#fff" class="${D.theme !== 'dark' ? 'on' : ''}" title="浅色" onclick="setTheme('light')"></button>
+          <button style="background:#222;border-color:#222" class="${D.theme === 'dark' ? 'on' : ''}" title="深色" onclick="setTheme('dark')"></button>
+        </div>
+        <span class="muted">只切换颜色变量</span>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>数据</h2>
+      <div class="settingrow">
+        <span>存储位置</span>
+        <div class="codepath">${esc(D.storagePath)}</div>
+        <button class="btn sm" onclick="changeStorage()">更改存储位置</button>
+      </div>
+      <div class="settingrow">
+        <span>回收站</span>
+        <div class="muted">查看已删除的杂物、任务与文件</div>
+        <button class="btn sm" onclick="go('recycle')">打开回收站</button>
+      </div>
+    </div>
+    <p class="muted">数据纯本地保存，不联网、无账号、无云同步。</p>`;
+  return { title: '设置', flow: '⑧ 设置 · 数据', actions: '', inner, nav: 'settings' };
+}
+
+function pageError(){
+  return {
+    title: '出错了',
+    flow: '⑧ 异常恢复',
+    actions: '',
+    nav: '',
+    inner: `<div class="errpage">
+      <div class="ph">ERROR</div>
+      <h2>无法访问该目录，请重新选择</h2>
+      <p class="muted">${esc(storageFailPath || '目标路径')} 不是可用的目录，数据仍保留在原路径。</p>
+      <div class="row" style="justify-content:center;margin-top:18px">
+        <button class="btn" onclick="retryStorage()">重试</button>
+        <button class="btn primary" onclick="changeStorage()">更换目录</button>
+      </div>
+    </div>`
+  };
+}
+
+/* ================= 壳与路由 ================= */
+function shell(o){
+  const navBtn = (key, label) => `<button class="${o.nav === key ? 'on' : ''}" onclick="navTo('${key}')">${label}</button>`;
+  return `<div class="app">
+    <aside class="side">
+      <div class="brand">任务与档案<small>TASK FACTORY · 可交互原型</small></div>
+      <div class="nav">
+        ${navBtn('library', '图书馆')}
+        ${navBtn('tasks', '任务栏')}
+        ${navBtn('distractions', '杂物堆')}
+        ${navBtn('settings', '设置')}
+      </div>
+      <div class="nav sub">原型工具</div>
+      <button class="btn sm ghost" style="width:100%" onclick="resetDemoAsk()">重置演示数据</button>
+    </aside>
+    <div class="main">
+      <div class="top">
+        <h1>${esc(o.title || '')}</h1>
+        <span class="flow">${esc(o.flow || '')}</span>
+        <div class="grow"></div>
+        ${o.actions || ''}
+      </div>
+      <div class="content">${o.inner || ''}</div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  document.documentElement.dataset.theme = D.theme === 'dark' ? 'dark' : 'light';
+  const app = $('#app');
+  if(view === 'sorting'){
+    app.innerHTML = sortingHTML();
+    mountSort();
+    return;
+  }
+  let page;
+  switch(view){
+    case 'tasks': page = pageTasks(); break;
+    case 'detail': page = pageDetail(); break;
+    case 'edit': page = pageEdit(); break;
+    case 'library': page = pageLibrary(); break;
+    case 'archive': page = pageArchive(); break;
+    case 'recycle': page = pageRecycle(); break;
+    case 'settings': page = pageSettings(); break;
+    case 'error': page = pageError(); break;
+    default: page = pageDistractions();
+  }
+  app.innerHTML = shell(page);
+  if(view === 'edit'){
+    mountEditor();
+    renderTagPickerList();
+    if(focusAfter){
+      const ta = document.querySelector(`textarea[data-id="${focusAfter.id}"]`);
+      if(ta){
+        ta.focus();
+        const n = ta.value.length;
+        ta.selectionStart = ta.selectionEnd = n;
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+      }
+      focusAfter = null;
+    }
+  }
+}
+
+function go(v, id){
+  if(id !== undefined) detailId = id;
+  if(view === 'edit' && v !== 'edit'){
+    clearTimeout(editTimer);
+    editDraft = null;
+    editSteps = [];
+    editDirty = false;
+  }
+  if(view === 'archive' && v !== 'archive') hideCut = false;
+  view = v;
+  closeMenu();
+  render();
+  window.scrollTo(0, 0);
+}
+
+function navTo(v){
+  if(view === 'edit'){
+    if(editDirty && !commitDraft(false)){
+      toast('请先完成必填项');
+      return;
+    }
+    editDraft = null;
+    editSteps = [];
+    editDirty = false;
+  }
+  go(v);
+}
+
+async function resetDemoAsk(){
+  const ok = await confirmDlg({
+    title: '重置演示数据',
+    message: '将清空本地演示数据并恢复到初始状态，继续？',
+    ok: '重置'
+  });
+  if(!ok) return;
+  resetDemo();
+  filterAll = true;
+  filterTags = D.tags.map(g => g.id);
+  selRecycle.clear();
+  dbError = false;
+  detailId = null;
+  go('distractions');
+}
+
+function init(){
+  filterAll = !(D.filterTagIds || []).length;
+  filterTags = filterAll
+    ? D.tags.map(g => g.id)
+    : (D.filterTagIds || []).filter(id => findTag(id));
+  if(!filterTags.length){
+    filterAll = true;
+    filterTags = D.tags.map(g => g.id);
+  }
+  document.documentElement.dataset.theme = D.theme === 'dark' ? 'dark' : 'light';
+  render();
+}
+
+init();
+
+</script>
+</body>
+</html>
