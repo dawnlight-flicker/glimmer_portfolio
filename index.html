@@ -161,7 +161,7 @@
   .canvas {
     position: relative;
     width: 1100px;
-    min-height: 9000px;
+    min-height: 16000px;
     flex-shrink: 0;
     background-color: var(--canvas-bg);
     background-image: radial-gradient(circle, var(--dot) 1.3px, transparent 1.3px);
@@ -180,6 +180,7 @@
     position: absolute;
   }
   .card h1 { font-size: 26px; font-weight: 600; letter-spacing: .5px; }
+  .card h2 { font-size: 21px; font-weight: 600; margin-bottom: 8px; letter-spacing: .5px; }
   .card h3 { font-size: 19px; font-weight: 600; margin-bottom: 8px; letter-spacing: .5px; }
   .card h4 { font-size: 16px; font-weight: 600; margin: 10px 0 6px; }
   .card p { margin-bottom: 8px; color: var(--soft); }
@@ -219,7 +220,6 @@
 
 <!-- ============================================================
      左侧导航栏（二级目录）
-     data-target 对应画布里的 top 值
      ============================================================ -->
 <nav class="side-nav">
   <div class="nav-brand">作品集</div>
@@ -248,12 +248,29 @@
     <a href="#" data-target="7800" class="nav-sub">原型</a>
   </div>
 
-  <a href="#" data-target="8500" class="nav-parent">联系方式</a>
+  <div class="nav-group">
+    <a href="#" data-target="8700" class="nav-parent">涂解</a>
+    <a href="#" data-target="8800" class="nav-sub">Why</a>
+    <a href="#" data-target="9200" class="nav-sub">How</a>
+    <a href="#" data-target="10400" class="nav-sub">规则系统</a>
+    <a href="#" data-target="11760" class="nav-sub">导出</a>
+    <a href="#" data-target="13800" class="nav-sub">工坊对比</a>
+  </div>
+
+  <div class="nav-group">
+    <a href="#" data-target="14550" class="nav-parent">盈利</a>
+    <a href="#" data-target="14650" class="nav-sub">困境</a>
+    <a href="#" data-target="15050" class="nav-sub">轻量化</a>
+    <a href="#" data-target="15300" class="nav-sub">嵌入游戏</a>
+  </div>
+
+  <a href="#" data-target="15700" class="nav-parent">联系方式</a>
 </nav>
 
 <div class="canvas-outer">
   <div class="canvas">
 
+    <!-- ==================== 前言 ==================== -->
     <div class="card" style="left: 6%; top: 80px; width: 28%;">
       <h1>前言</h1>
       <p>拾光签到任务工厂的对比和思考</p>
@@ -270,6 +287,7 @@
       <p>在《拾光签》的设计中，我误以为生活的混乱是源于缺乏清晰的时间规划，从而将落点放在了日程规划上，以日历看板为核心进行设计，在后续体验中我意识到，正是由于精确的日程往往难以实行，才一而再再而三的引发我的焦虑，比起聚焦于时间，聚焦于任务，将任务拆解为步骤再安排执行，或许是更灵活的选择，所以在《任务工厂》中，我以任务为核心，做了步骤拆解、进度展示和完成归档的设计。</p>
     </div>
 
+    <!-- ==================== 拾光签 ==================== -->
     <div class="card" style="left: 6%; top: 1100px; width: 28%;">
       <h1>拾光签</h1>
       <p>一个待办日历匣的诞生</p>
@@ -317,6 +335,7 @@
       <p>实机演示</p>
     </div>
 
+    <!-- ==================== Task Factory ==================== -->
     <div class="card" style="left: 6%; top: 4500px; width: 28%;">
       <h1>Task Factory</h1>
       <p>trouble && solution</p>
@@ -353,7 +372,162 @@
       </iframe>
     </div>
 
-    <div class="card" style="left: 6%; top: 8500px; width: 60%;">
+    <!-- ==================== 涂解 ==================== -->
+    <div class="card" style="left: 6%; top: 8700px; width: 28%;">
+      <h1>涂解</h1>
+      <p>一个谜题设计工具的诞生</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 8800px; width: 68%;">
+      <h3>Why?</h3>
+      <p>本人深深沉迷于《格利米斯工匠》，在还没有玩完所有关卡时，就为关卡的有限感到无法遏制的哀伤，本着自食其力的心理，想说游戏内的关卡是有限的，如果自己打造，便是无限的，于是变兴致冲冲地开始设计这个工具。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 8950px; width: 60%;">
+      <p>但被热血冲昏头脑地我忽略了俩个致命的问题</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 9000px; width: 90%;">
+      <p>1、自己设计的关卡，自己知道答案所以无法游玩；</p>
+      <p>2、《格利米斯工匠》内已经内置了创意工坊地功能，而我沉迷游玩完全没有注意到，并且第一个问题已经被第二个问题解决，玩家间互相分享设计的谜题，谜题便无穷无尽了！我原本的设计就像地狱中的长柄勺一样狭隘，但考虑到这个工具很大概率只有我自己使用，只能用于设计谜题分享给我那些并不那么热衷于解密游戏，但会在我期待的眼神和热情的鼓励中赏光的朋友，我的导出设计也并非一无是处，除此之外因为我设计的时候并未体验过创意工坊的功能，所以很多设计逻辑都不同，因为躲开了官方答案所以没有被限制思考，现在我就学到了俩份设计方案了，怎么不算因祸得福，后面会做一点对比分析</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 9200px; width: 60%;">
+      <h3>How?</h3>
+      <p>最先设计的自然是设计部分，我根据自己的游玩体验，将设计部分分为了0-3.5图层（网格层，地砖层、分割线层、推演层、贴纸层），并设计了可见性和洋葱皮的功能，和绘画软件类似，符合直觉。</p>
+    </div>
+
+    <img class="doodle"
+         src="assets/jian_tu.png"
+         alt=""
+         style="left: 68%; top: 9180px; width: 30%; transform: rotate(-8deg);">
+
+    <div class="card" style="left: 6%; top: 9400px; width: 60%;">
+      <img class="card-img" src="assets/dizhuan_ceng.png" alt="">
+    </div>
+
+    <div class="card" style="left: 70%; top: 9460px; width: 10%;">
+      <p>- 网格层顾名思义就是网格，方便用户设计时参考区块等组件的位置</p>
+    </div>
+
+    <div class="card" style="left: 70%; top: 9600px; width: 10%;">
+      <p>- 地砖层：用于铺设谜题所需的地砖（也就是玩家鼠标可操作的空间，后续的分割线、推演以及贴纸都必须发生在地砖层所在）</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 9900px; width: 15%;">
+      <p>分割线层：分割线位于地砖内各个格子之间</p>
+      <p>- 普通线（图中一杠）：线两边的格子不能属于同一区块</p>
+      <p>- 等价线（图中两杠）：线两边的格子不能属于同一区块，且俩边形状必须相等（允许旋转、镜像）</p>
+      <p>- 非等价线（图中虚线）：线两边的格子不能属于同一区块，且俩边形状不能相等（包含旋转、镜像）</p>
+    </div>
+
+    <div class="card" style="left: 30%; top: 9900px; width: 60%;">
+      <img class="card-img" src="assets/fengexian_ceng.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 10400px; width: 60%;">
+      <p>规则限制（主要发生在推演层，其实分割线也是规则的一部分，但是分割线可以在以下所有类型中出现，所以下文所提的规则都是推演层的可选规则）是这类谜题的核心，在设计之初我设计成由用户从三种规则类型选择其一并填写规则内容</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 10500px; width: 20%;">
+      <img class="card-img" src="assets/xingzhuangxing_guize.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 10900px; width: 20%;">
+      <p>- 形状型：限制单区块形状, 填写N_Shape(限制形状的数量），并在网格中勾选出N_N个不相同（包括镜像旋转）联通图案作为限制形状</p>
+    </div>
+
+    <div class="card" style="left: 36%; top: 10500px; width: 20%;">
+      <img class="card-img" src="assets/shouji_guize.png" alt="">
+    </div>
+
+    <div class="card" style="left: 36%; top: 10900px; width: 20%;">
+      <p>- 收集型：限制单区块所必须包含的贴纸， 填写N_Sticker(限制贴纸的数量），并在网格中勾选出N_N个贴纸作为限制图案</p>
+    </div>
+
+    <div class="card" style="left: 66%; top: 10500px; width: 20%;">
+      <img class="card-img" src="assets/shuzi_guize.png" alt="">
+    </div>
+
+    <div class="card" style="left: 66%; top: 10900px; width: 20%;">
+      <p>- 数字型：限制单区块格子数，  填写N_Num(限制数的数量），并填写N_N个数字作为限制数</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 11100px; width: 60%;">
+      <p>后续又增加了规则组合，也就是在设计初可以选择要使用的规则数，然后选择要使用的规则，再按规则填写内容，但实际上形状型限制形状的同时就已经限制了数字，所以这个功能主要是支持收集型和其他类型组合，和为后续可能提供的其他规则类型提供更多可能</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 11250px; width: 60%;">
+      <p>存储路径更改，很有必要，因为c盘很宝贵</p>
+      <img class="card-img" src="assets/cunchulujing_genggai.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 11760px; width: 60%;">
+      <p>然后导出功能也是比较重要的，因为我的朋友们都不是学计算机的，对解密也没有很高的兴趣，所以我需要的导出功能必须足够轻量，采用的是提前编译好的播放器＋关卡数据，exe点开即玩，这里还有一个小小的取舍，一开始设计的时候是有测试模式和发布功能的，但这是思维定势，实际上作为一个本地工具，题库就是测试区域，导出才是对标正常联网产品的发布功能。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 11900px; width: 60%;">
+      <p>在做作品集的时候想到，导出实际上也可以导出为可嵌合进网页的html，于是便加入了这个功能，实际上和exe有点重叠了毕竟都是轻量导出，对玩家来说区别不大，但是这样大家就可以在作品集里体验了，我放入了俩个小关卡，来试试看吧！</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 11990px; width: 60%;">
+      <p>加入了手机端的适配（推荐使用电脑端游玩），电脑端左键点击是添加，右键点击是删除，手机端将删除键独立出来类似于橡皮擦</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 12050px; width: 87%;">
+      <iframe src="test1/player.html"
+        style="width: 100%; height: 700px; border: 1px solid #e2ded4; border-radius: 8px;">
+      </iframe>
+    </div>
+
+    <div class="card" style="left: 6%; top: 12800px; width: 87%;">
+      <p>写好prd后让agent产出html原型图，预防表述有歧义的部分，确认agent理解无误后便可以开发了。</p>
+      <iframe src="prototype/prototype_000.html"
+          style="width: 100%; height: 920px; border: none;">
+      </iframe>
+    </div>
+
+    <div class="card" style="left: 6%; top: 13800px; width: 60%;">
+      <h2>最后是和《格利米斯工匠》的创意工坊对答案</h2>
+      <p>没有想到居然有很多值得吐槽的反直觉设计，先讲一下我觉得很值得学习的地方：</p>
+      <p>1、并没有分图层，而是全部在一个图层上，通过键盘按键区分要安置的组件，感觉虽然有一个查找字典的学习过程，熟悉后还是非常方便的；</p>
+      <p>2、规则组合也比我的设计自由得多，可以随意添加，不需要选好规则个数。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 14000px; width: 60%;">
+      <p>然后就是我觉得毕竟反直觉的设计，首先就是地砖的铺设和删除居然都是右键，这和游戏内的设计（左键添加右键删除）完全不同，导致我刚上手的时候左键点了半天，我觉得同一个产品内，操作应该有一致性，避免这种情况。</p>
+      <p>还有就是限制形状的设计，没有连通性检测，非常古怪，这样的话很难区分是否属于同一区块，而且又存在一个形状可能是另一个形状的子集的情况，完全没法区分，添加形状设计的时候也非常反直觉，不是勾选好一个形状就保存然后刷新画布，而是勾选形状后在规则中选择添加形状，然后！！注意要手动删除画布中的形状再添加，否则下次添加时就会出现重复</p>
+      <p>另外还有bug，进入测试模式再返回后，会把测试模式的报错带回来，需要手动解除</p>
+      <p>游戏内截图因为版权原因无法上传GitHub page</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 14350px; width: 60%;">
+      <p>最大的收获：拓宽了设计思路，可以看到官方的设计是以自由度为中心的，而我则不自觉地以“不能出bug”为中心，下意识地增加了很多限制性条件，在自由度上更为欠缺</p>
+    </div>
+
+    <!-- ==================== 盈利 ==================== -->
+    <div class="card" style="left: 6%; top: 14550px; width: 28%;">
+      <h1>盈利</h1>
+      <p>解密游戏盈利困境和解决方法</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 14650px; width: 60%;">
+      <p>解谜游戏作为一个游戏品类，盈利空间显然是非常小的，在2025年的《中国游戏产业报告》中，甚至没有解密这个分类（）</p>
+      <img class="card-img" src="assets/caibao.png" alt="">
+    </div>
+
+    <div class="card" style="left: 6%; top: 15050px; width: 60%;">
+      <h2>全部轻量化+广告</h2>
+      <p>《格利米斯工匠》是端游，有很多快捷键和鼠标的设计，但是作为一个关卡类解密，关卡与关卡之间完全独立，本身是很适合移动端的，非常适合在等车、排队的适合拿出来玩，操作也并不困难，快捷键的问题可以通过类似笔记软件的*笔-橡皮擦*切换解决，我在涂解的试玩部分也实现了这个功能，至少在我看来，《格利米斯工匠》这样的关卡类解密，上架手机端、微信小程序这样游玩成本更低的渠道，盈利的空间是更大的。能不能让用户最低成本体验到，很多时候我做项目时最先考虑的问题，因为我希望我的朋友可以点击即玩。</p>
+    </div>
+
+    <div class="card" style="left: 6%; top: 15300px; width: 60%;">
+      <h2>嵌入更复杂的游戏中</h2>
+      <p>解密游戏本身作为一个品类或许并不盈利，但在各种rpg游戏中，经常会按需加入一些解密的关卡，尤其是目前很火的开放世界手游，通常会在大世界加入一些谜题，玩家需要解开谜题才能获得宝箱，解密成为探索的一部分。</p>
+    </div>
+
+    <!-- ==================== 联系方式 ==================== -->
+    <div class="card" style="left: 6%; top: 15700px; width: 60%;">
       <h1>联系方式</h1>
       <p>电话：13720867131</p>
       <p>邮箱：lishuqi_05@163.com</p>
